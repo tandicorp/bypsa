@@ -237,11 +237,12 @@ class SaleOrder(models.Model):
     def _compute_amount_taxes_insurance(self):
         for record in self:
             amount_taxes = self.env.user.company_id.tax_insurance_peasant_id.compute_all(record.amount_fee)
-            record.amount_tax_insurance_peasant = amount_taxes['taxes'][0]['amount']
-            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
-                                                  _branches_medical_assistance]:
-                amount_taxes = self.env.user.company_id.tax_super_cias_id.compute_all(record.amount_fee)
-                record.amount_tax_super_cias = amount_taxes['taxes'][0]['amount']
+            if amount_taxes:
+				record.amount_tax_insurance_peasant = amount_taxes['taxes'][0]['amount']
+				if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
+													  _branches_medical_assistance]:
+					amount_taxes = self.env.user.company_id.tax_super_cias_id.compute_all(record.amount_fee)
+					record.amount_tax_super_cias = amount_taxes['taxes'][0]['amount']
 
     @api.depends("amount_fee", "amount_tax_insurance_peasant", "amount_tax_super_cias", "amount_tax_emission_rights")
     def _compute_amount_fee_subtotal(self):
@@ -250,8 +251,9 @@ class SaleOrder(models.Model):
                                               record.amount_tax_super_cias, record.amount_tax_emission_rights])
             if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
                                                   _branches_no_taxes]:
-                amount_taxes = self.env.user.company_id.account_sale_tax_id.compute_all(record.amount_fee_subtotal)
-                record.amount_tax_iva = amount_taxes['taxes'][0]['amount']
+                if amount_taxes:
+					amount_taxes = self.env.user.company_id.account_sale_tax_id.compute_all(record.amount_fee_subtotal)
+					record.amount_tax_iva = amount_taxes['taxes'][0]['amount']
 
     def _set_amounts(self):
         for record in self:
