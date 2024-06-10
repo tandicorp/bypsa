@@ -246,8 +246,8 @@ class SaleOrder(models.Model):
     @api.depends("amount_fee", "amount_tax_insurance_peasant", "amount_tax_super_cias", "amount_tax_emission_rights")
     def _compute_amount_fee_subtotal(self):
         for record in self:
-        #    record.amount_fee_subtotal = sum([record.amount_fee, record.amount_tax_insurance_peasant,
-        #                                      record.amount_tax_super_cias, record.amount_tax_emission_rights])
+            record.amount_fee_subtotal = sum([record.amount_fee, record.amount_tax_insurance_peasant,
+                                              record.amount_tax_super_cias, record.amount_tax_emission_rights])
         #    if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
         #                                          _branches_no_taxes]:
         #        amount_taxes = self.env.user.company_id.account_sale_tax_id.compute_all(record.amount_fee_subtotal)
