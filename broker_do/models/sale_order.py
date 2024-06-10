@@ -212,46 +212,46 @@ class SaleOrder(models.Model):
     @api.depends("type_id")
     def get_movement_branch(self):
         movement_branch_obj = self.env['broker.movement.branch'].sudo()
-        for record in self:
-            movement_branch_id = movement_branch_obj.search(
-                [('type_id', '=', record.type_id.id), ("branch_id", '=', record.contract_id.branch_id.id)], limit=1)
-            if movement_branch_id:
-                documents = []
-                for document in movement_branch_id.document_line_ids:
-                    documents.append(Command.create({
-                        "order_id": record.id,
-                        "document_id": document.id,
-                        "name": document.name
-                    }))
-                record.document_line_ids = [fields.Command.clear()] + documents
-                record.movement_branch_id = movement_branch_id.id
-            movement_date_ids = [(move.id, move.date_start) for move in self.contract_id.movement_ids]
-            movement_date_ids.sort(key=lambda x: x[1])
-            if self.env.ref(_module + '.' + 'monthly_declaration_movement') == self.type_id:
-                period_id = self.contract_id.get_period_from_date(movement_date_ids[-1][1])
-                next_period_id = self.contract_id.get_next_period(period_id)
-                self.date_start = next_period_id.date_from
-                self.date_end = next_period_id.date_to
+        #for record in self:
+        #    movement_branch_id = movement_branch_obj.search(
+        #        [('type_id', '=', record.type_id.id), ("branch_id", '=', record.contract_id.branch_id.id)], limit=1)
+        #    if movement_branch_id:
+        #        documents = []
+        #        for document in movement_branch_id.document_line_ids:
+        #            documents.append(Command.create({
+        #                "order_id": record.id,
+        #                "document_id": document.id,
+        #                "name": document.name
+        #            }))
+        #        record.document_line_ids = [fields.Command.clear()] + documents
+        #        record.movement_branch_id = movement_branch_id.id
+        #    movement_date_ids = [(move.id, move.date_start) for move in self.contract_id.movement_ids]
+        #    movement_date_ids.sort(key=lambda x: x[1])
+        #    if self.env.ref(_module + '.' + 'monthly_declaration_movement') == self.type_id:
+        #        period_id = self.contract_id.get_period_from_date(movement_date_ids[-1][1])
+        #        next_period_id = self.contract_id.get_next_period(period_id)
+        #        self.date_start = next_period_id.date_from
+        #        self.date_end = next_period_id.date_to
 
     @api.depends("amount_fee")
     def _compute_amount_taxes_insurance(self):
         for record in self:
             amount_taxes = self.env.user.company_id.tax_insurance_peasant_id.compute_all(record.amount_fee)
-            record.amount_tax_insurance_peasant = amount_taxes['taxes'][0]['amount']
-            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
-                                                  _branches_medical_assistance]:
-                amount_taxes = self.env.user.company_id.tax_super_cias_id.compute_all(record.amount_fee)
-                record.amount_tax_super_cias = amount_taxes['taxes'][0]['amount']
+        #    record.amount_tax_insurance_peasant = amount_taxes['taxes'][0]['amount']
+        #    if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
+        #                                          _branches_medical_assistance]:
+        #        amount_taxes = self.env.user.company_id.tax_super_cias_id.compute_all(record.amount_fee)
+        #        record.amount_tax_super_cias = amount_taxes['taxes'][0]['amount']
 
     @api.depends("amount_fee", "amount_tax_insurance_peasant", "amount_tax_super_cias", "amount_tax_emission_rights")
     def _compute_amount_fee_subtotal(self):
         for record in self:
-            record.amount_fee_subtotal = sum([record.amount_fee, record.amount_tax_insurance_peasant,
-                                              record.amount_tax_super_cias, record.amount_tax_emission_rights])
-            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
-                                                  _branches_no_taxes]:
-                amount_taxes = self.env.user.company_id.account_sale_tax_id.compute_all(record.amount_fee_subtotal)
-                record.amount_tax_iva = amount_taxes['taxes'][0]['amount']
+        #    record.amount_fee_subtotal = sum([record.amount_fee, record.amount_tax_insurance_peasant,
+        #                                      record.amount_tax_super_cias, record.amount_tax_emission_rights])
+        #    if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
+        #                                          _branches_no_taxes]:
+        #        amount_taxes = self.env.user.company_id.account_sale_tax_id.compute_all(record.amount_fee_subtotal)
+        #        record.amount_tax_iva = amount_taxes['taxes'][0]['amount']
 
     def _set_amounts(self):
         for record in self:
@@ -264,9 +264,9 @@ class SaleOrder(models.Model):
     def _compute_name(self):
         for this in self:
             insurer_shortname = this.contract_id and this.contract_id.insurer_id.shortname or ""
-            type_code = this.type_id and this.type_id.code or ""
+        '''    type_code = this.type_id and this.type_id.code or ""
             this.name = " - ".join([insurer_shortname, this.contract_id.name]) + " | " + " - ".join(
-                [type_code, str(this.sequence)])
+                [type_code, str(this.sequence)])'''
 
     @api.onchange('amount_fee', 'amount_tax_insurance_peasant', 'amount_tax_super_cias', 'amount_tax_iva',
                   'amount_tax_emission_rights', 'amount_other_charges', 'commission_percentage', )

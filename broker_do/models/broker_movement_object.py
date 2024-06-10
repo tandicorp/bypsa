@@ -124,7 +124,7 @@ class BrokerMovementObject(models.Model):
     @api.depends("branch_id")
     def get_movement_branch(self):
         movement_branch_obj = self.env['broker.movement.branch'].sudo()
-        type = self.env.ref('broker_do.policy_movement')
+        '''type = self.env.ref('broker_do.policy_movement')
         for record in self:
             if record.movement_id and record.movement_id.movement_branch_id:
                 record.movement_branch_id = record.movement_id.movement_branch_id.id
@@ -132,7 +132,7 @@ class BrokerMovementObject(models.Model):
                 movement_branch_id = movement_branch_obj.search(
                     [('type_id', '=', type.id), ("branch_id", '=', record.branch_id.id)], limit=1)
                 if movement_branch_id:
-                    record.movement_branch_id = movement_branch_id.id
+                    record.movement_branch_id = movement_branch_id.id'''
 
     def generate_comparison(self):
         self.ensure_one()
