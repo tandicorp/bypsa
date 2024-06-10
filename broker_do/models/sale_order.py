@@ -227,11 +227,11 @@ class SaleOrder(models.Model):
                 record.movement_branch_id = movement_branch_id.id
             movement_date_ids = [(move.id, move.date_start) for move in self.contract_id.movement_ids]
             movement_date_ids.sort(key=lambda x: x[1])
-            if self.env.ref(_module + '.' + 'monthly_declaration_movement') == self.type_id:
-                period_id = self.contract_id.get_period_from_date(movement_date_ids[-1][1])
-                next_period_id = self.contract_id.get_next_period(period_id)
-                self.date_start = next_period_id.date_from
-                self.date_end = next_period_id.date_to
+            #if self.env.ref(_module + '.' + 'monthly_declaration_movement') == self.type_id:
+            #    period_id = self.contract_id.get_period_from_date(movement_date_ids[-1][1])
+            #    next_period_id = self.contract_id.get_next_period(period_id)
+            #    self.date_start = next_period_id.date_from
+            #    self.date_end = next_period_id.date_to
 
     @api.depends("amount_fee")
     def _compute_amount_taxes_insurance(self):
