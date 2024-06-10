@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="broker_do_hr_employee_form_inherit" model="ir.ui.view">
+            <field name="name">broker.do.hr.employee.form.inherit</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='coach_id']" position="after">
+                    <field name="receive_commission"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

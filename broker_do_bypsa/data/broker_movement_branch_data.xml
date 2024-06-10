@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <function name="write" model="ir.model.data">
+            <value model="ir.model.data" search="[('module', '=', 'broker_do'), ('name', '=', 'broker_movement_branch_vehicles')]"/>
+            <value eval="{'noupdate': False}"/>
+        </function>
+        <function name="write" model="ir.model.data">
+            <value model="ir.model.data" search="[('module', '=', 'broker_do'), ('name', '=', 'broker_movement_branch_customs')]"/>
+            <value eval="{'noupdate': False}"/>
+        </function>
+        <function name="write" model="ir.model.data">
+            <value model="ir.model.data" search="[('module', '=', 'broker_do'), ('name', '=', 'broker_movement_branch_individual')]"/>
+            <value eval="{'noupdate': False}"/>
+        </function>
+        <function name="write" model="ir.model.data">
+            <value model="ir.model.data" search="[('module', '=', 'broker_do'), ('name', '=', 'broker_movement_branch_collective')]"/>
+            <value eval="{'noupdate': False}"/>
+        </function>
+        <!--        VEHÍCULOS-->
+        <record id="broker_do.broker_movement_branch_vehicles" model="broker.movement.branch">
+            <field name="object_line_ids"
+                   eval="[
+                   (0, 0, {
+                   'name': 'Número de documento contratante',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Contratante',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                    (0, 0, {
+                   'name': 'Número de documento asegurado',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                    (0, 0, {
+                   'name': 'Asegurado',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                    (0, 0, {
+                   'name': 'Beneficiario',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                    (0, 0, {
+                   'name': 'Propietario',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                    (0, 0, {
+                   'name': 'Tipo',
+                   'type': 'selection',
+                   'value': 'AUTOMÓVIL,BICICLETA,BLINDADO,CAMIONETA,CAMIÓN,CAMIÓN FURGÓN,COOPE,DOBLE CABINA,FURGONETA,GRÚA,HATCHBACK,HÍBRIDO,JEEP,MONTACARGA,MOTOCICLETA,PICKUP,SEDAN,STATION WAGON,SUV,TODO TERRENO'
+                   }),
+                    (0, 0, {
+                   'name': 'Pais de Origen',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                    (0, 0, {
+                   'name': 'Valor de extras',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Detalle de extras',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Valor total vehículo y extras',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                    (0, 0, {
+                   'name': 'Tasa',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Prima MÍnima',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Prima Neta',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Oficial',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   ]"/>
+        </record>
+        <!--        ADUANA-->
+        <record id="broker_do.broker_movement_branch_customs" model="broker.movement.branch">
+            <field name="object_line_ids"
+                   eval="[
+                   (0, 0, {
+                   'name': 'Impuesto desaduanización pago de tributos al comercio exterior',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Valor asegurado',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Tasa',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Prima Neta',
+                   'type': 'float',
+                   'value': ''
+                   }),
+
+                   ]"/>
+        </record>
+        <!--        VIDA INDIVIDUAL-->
+        <record id="broker_do.broker_movement_branch_individual" model="broker.movement.branch">
+            <field name="object_line_ids"
+                   eval="[
+                   (0, 0, {
+                   'name': 'Nombre de Empresa',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Suma asegurada',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Tipo de Grupo',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Plan',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Parentesco',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Num. Documento',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Num. Documento Titular',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'NOMBRES COMPLETOS',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Prima Neta Smart',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Prima Neta Travel',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Prima Neta Excequial',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Ejecutivo',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   ]"/>
+        </record>
+        <!--        VIDA COLECTIVA-->
+        <record id="broker_do.broker_movement_branch_collective" model="broker.movement.branch">
+            <field name="object_line_ids"
+                   eval="[
+                   (0, 0, {
+                   'name': 'Nombre de Empresa',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Número de Doc. Identidad',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Nombre',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Suma Asegurada - Muerte por cualquier causa',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Suma Asegurada - Muerte accidental',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Suma Asegurada - Desmembración accidental',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Suma Asegurada-Incapacidad Total y permanente',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Suma Asegurada-Enfermedades graves',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Suma Asegurada-Gastos de entierro titular',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Suma Asegurada-Gastos de entierro cónyuge',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Prima Neta',
+                   'type': 'float',
+                   'value': ''
+                   }),
+                   (0, 0, {
+                   'name': 'Ejecutivo',
+                   'type': 'char',
+                   'value': ''
+                   }),
+                   ]"/>
+        </record>
+    </data>
+</odoo>

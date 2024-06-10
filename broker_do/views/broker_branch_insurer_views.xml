@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="brokerdo_branch_insurer_form" model="ir.ui.view">
+        <field name="name">brokerdo.branch.insurer.form</field>
+        <field name="model">broker.branch.insurer</field>
+        <field name="arch" type="xml">
+            <form string="Metas por Aseguradora">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="insurer_id" required="1"
+                                   domain="[('partner_type_id','=',%(broker_do.insurance_company_data)d)]"/>
+                        </group>
+                        <group>
+                            <field name="branch_id" options="{'no_create': True}" required="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Configuraciones">
+                            <field name="config_line_ids">
+                                <tree editable="bottom">
+                                    <field name="type" required="1"/>
+                                    <field name="value" required="1"/>
+                                    <field name="date_from" required="1"/>
+                                    <field name="date_to" required="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="brokerdo_branch_insurer_tree" model="ir.ui.view">
+        <field name="name">brokerdo.branch.insurer.tree</field>
+        <field name="model">broker.branch.insurer</field>
+        <field name="arch" type="xml">
+            <tree string="Configuración Ramo/Aseguradora">
+                <field name="insurer_id"/>
+                <field name="branch_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="brokerdo_branch_insurer_action" model="ir.actions.act_window">
+        <field name="name">Metas por Aseguradora</field>
+        <field name="res_model">broker.branch.insurer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Ingrese una nueva configuración comercial
+            </p>
+        </field>
+    </record>
+
+</odoo>

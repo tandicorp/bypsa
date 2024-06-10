@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="broker_branch_individual" model="broker.branch">
+            <field name="name">INDIVIDUAL VIDA</field>
+            <field name="code">VIN</field>
+            <field name="code_super_cias">1</field>
+            <field name="product_id" ref="product_product_individual"/>
+            <field name="product_reversal_id" ref="product_product_reversal_individual"/>
+        </record>
+        <record id="broker_branch_collective" model="broker.branch">
+            <field name="name">COLECTIVO VIDA</field>
+            <field name="code">VCO</field>
+            <field name="code_super_cias">2</field>
+            <field name="product_id" ref="product_product_collective"/>
+            <field name="product_reversal_id" ref="product_product_reversal_collective"/>
+        </record>
+        <record id="broker_branch_medical_assistance" model="broker.branch">
+            <field name="name">ASISTENCIA MÉDICA</field>
+            <field name="code">AMI</field>
+            <field name="code_super_cias">3</field>
+            <field name="product_id" ref="product_product_assistance_individual"/>
+            <field name="product_reversal_id" ref="product_product_reversal_assistance_individual"/>
+        </record>
+        <record id="broker_branch_accident" model="broker.branch">
+            <field name="name">ACCIDENTES PERSONALES</field>
+            <field name="code">ACC</field>
+            <field name="code_super_cias">4</field>
+            <field name="product_id" ref="product_product_accident"/>
+            <field name="product_reversal_id" ref="product_product_reversal_accident"/>
+        </record>
+        <record id="broker_branch_fire" model="broker.branch">
+            <field name="name">INCENDIO Y LÍNEAS ALIADAS</field>
+            <field name="code">INC</field>
+            <field name="code_super_cias">5</field>
+            <field name="product_id" ref="product_product_fire"/>
+            <field name="product_reversal_id" ref="product_product_reversal_fire"/>
+        </record>
+        <record id="broker_branch_profit" model="broker.branch">
+            <field name="name">LUCRO CESANTE A CONSECUENCIA DE INCENDIO Y LÍNEAS ALIADAS</field>
+            <field name="code">LCS</field>
+            <field name="code_super_cias">6</field>
+            <field name="product_id" ref="product_product_profit"/>
+            <field name="product_reversal_id" ref="product_product_reversal_profit"/>
+        </record>
+        <record id="broker_branch_vehicles" model="broker.branch">
+            <field name="name">VEHÍCULOS</field>
+            <field name="code">VEH</field>
+            <field name="code_super_cias">7</field>
+            <field name="product_id" ref="product_product_vehicles"/>
+            <field name="product_reversal_id" ref="product_product_reversal_vehicles"/>
+        </record>
+        <record id="broker_branch_transport" model="broker.branch">
+            <field name="name">TRANSPORTE</field>
+            <field name="code">TIN</field>
+            <field name="code_super_cias">8</field>
+            <field name="product_id" ref="product_product_transport"/>
+            <field name="product_reversal_id" ref="product_product_reversal_transport"/>
+        </record>
+        <record id="broker_branch_maritime" model="broker.branch">
+            <field name="name">MARÍTIMO</field>
+            <field name="code">MAR</field>
+            <field name="code_super_cias">9</field>
+            <field name="product_id" ref="product_product_maritime"/>
+            <field name="product_reversal_id" ref="product_product_reversal_maritime"/>
+        </record>
+        <record id="broker_branch_aviation" model="broker.branch">
+            <field name="name">AVIACIÓN</field>
+            <field name="code">AVI</field>
+            <field name="code_super_cias">10</field>
+            <field name="product_id" ref="product_product_aviation"/>
+            <field name="product_reversal_id" ref="product_product_reversal_aviation"/>
+        </record>
+        <record id="broker_branch_heist" model="broker.branch">
+            <field name="name">ROBO</field>
+            <field name="code">ROB</field>
+            <field name="code_super_cias">11</field>
+            <field name="product_id" ref="product_product_heist"/>
+            <field name="product_reversal_id" ref="product_product_reversal_heist"/>
+        </record>
+        <record id="broker_branch_money" model="broker.branch">
+            <field name="name">DINERO Y VALORES</field>
+            <field name="code">DVA</field>
+            <field name="code_super_cias">12</field>
+            <field name="product_id" ref="product_product_money"/>
+            <field name="product_reversal_id" ref="product_product_reversal_money"/>
+        </record>
+        <record id="broker_branch_agricultural" model="broker.branch">
+            <field name="name">AGROPECUARIO</field>
+            <field name="code">AGR</field>
+            <field name="code_super_cias">13</field>
+            <field name="product_id" ref="product_product_agricultural"/>
+            <field name="product_reversal_id" ref="product_product_reversal_agricultural"/>
+        </record>
+        <record id="broker_branch_all_risk_contractor" model="broker.branch">
+            <field name="name">TODO RIESGO PARA CONTRATISTAS</field>
+            <field name="code">TRC</field>
+            <field name="code_super_cias">14</field>
+            <field name="product_id" ref="product_product_all_risk_contractor"/>
+            <field name="product_reversal_id" ref="product_product_reversal_all_risk_contractor"/>
+        </record>
+        <record id="broker_branch_machinery_assembly" model="broker.branch">
+            <field name="name">MONTAJE DE MAQUINARIA</field>
+            <field name="code">MOM</field>
+            <field name="code_super_cias">15</field>
+            <field name="product_id" ref="product_product_machinery_assembly"/>
+            <field name="product_reversal_id" ref="product_product_reversal_machinery_assembly"/>
+        </record>
+        <record id="broker_branch_machinery_breakage" model="broker.branch">
+            <field name="name">ROTURA DE MAQUINARIA</field>
+            <field name="code">ROM</field>
+            <field name="code_super_cias">16</field>
+            <field name="product_id" ref="product_product_machinery_breakage"/>
+            <field name="product_reversal_id" ref="product_product_reversal_machinery_breakage"/>
+        </record>
+        <record id="broker_branch_loss_benefit_machinery" model="broker.branch">
+            <field name="name">PÉRDIDA DE BENEFICIOS POR ROTURA DE MAQUINARIA</field>
+            <field name="code">PRM</field>
+            <field name="code_super_cias">17</field>
+            <field name="product_id" ref="product_product_loss_benefit_machinery"/>
+            <field name="product_reversal_id" ref="product_product_reversal_loss_benefit_machinery"/>
+        </record>
+        <record id="broker_branch_equipment_machinery" model="broker.branch">
+            <field name="name">EQUIPO Y MAQUINARIA DE CONTRATISTAS</field>
+            <field name="code">EMC</field>
+            <field name="code_super_cias">18</field>
+            <field name="product_id" ref="product_product_equipment_machinery"/>
+            <field name="product_reversal_id" ref="product_product_reversal_equipment_machinery"/>
+        </record>
+        <record id="broker_branch_completed_civil_works" model="broker.branch">
+            <field name="name">OBRAS CIVILES TERMINADAS</field>
+            <field name="code">OCT</field>
+            <field name="code_super_cias">19</field>
+            <field name="product_id" ref="product_product_completed_civil_works"/>
+            <field name="product_reversal_id" ref="product_product_reversal_completed_civil_works"/>
+        </record>
+        <record id="broker_branch_all_oil_risk" model="broker.branch">
+            <field name="name">TODO RIESGO PETROLERO</field>
+            <field name="code">TRP</field>
+            <field name="code_super_cias">38</field>
+            <field name="product_id" ref="product_product_all_oil_risk"/>
+            <field name="product_reversal_id" ref="product_product_reversal_all_oil_risk"/>
+        </record>
+        <record id="broker_branch_electronic_equip" model="broker.branch">
+            <field name="name">EQUIPO ELETRÓNICO</field>
+            <field name="code">EQE</field>
+            <field name="code_super_cias">20</field>
+            <field name="product_id" ref="product_product_electronic_equip"/>
+            <field name="product_reversal_id" ref="product_product_reversal_electronic_equip"/>
+        </record>
+        <record id="broker_branch_other_risk" model="broker.branch">
+            <field name="name">OTROS RIESGOS TÉCNICOS</field>
+            <field name="code">ORT</field>
+            <field name="code_super_cias">39</field>
+            <field name="product_id" ref="product_product_other_risk"/>
+            <field name="product_reversal_id" ref="product_product_reversal_other_risk"/>
+        </record>
+        <record id="broker_branch_responsibility" model="broker.branch">
+            <field name="name">RESPONSABILIDAD CIVIL</field>
+            <field name="code">REC</field>
+            <field name="code_super_cias">21</field>
+            <field name="product_id" ref="product_product_responsibility"/>
+            <field name="product_reversal_id" ref="product_product_reversal_responsibility"/>
+        </record>
+        <record id="broker_branch_fidelity" model="broker.branch">
+            <field name="name">FIDELIDAD</field>
+            <field name="code">FID</field>
+            <field name="code_super_cias">22</field>
+            <field name="product_id" ref="product_product_fidelity"/>
+            <field name="product_reversal_id" ref="product_product_reversal_fidelity"/>
+        </record>
+        <record id="broker_branch_seriousness" model="broker.branch">
+            <field name="name">SERIEDAD DE OFERTA</field>
+            <field name="code">SEO</field>
+            <field name="code_super_cias">23</field>
+            <field name="product_id" ref="product_product_seriousness"/>
+            <field name="product_reversal_id" ref="product_product_reversal_seriousness"/>
+        </record>
+        <record id="broker_branch_compliance" model="broker.branch">
+            <field name="name">CUMPLIMIENTO DE CONTRATO</field>
+            <field name="code">CUC</field>
+            <field name="code_super_cias">27</field>
+            <field name="product_id" ref="product_product_compliance"/>
+            <field name="product_reversal_id" ref="product_product_reversal_compliance"/>
+        </record>
+        <record id="broker_branch_good_use_advance" model="broker.branch">
+            <field name="name">BUEN USO DE ANTICIPO</field>
+            <field name="code">BUA</field>
+            <field name="code_super_cias">28</field>
+            <field name="product_id" ref="product_product_good_use_advance"/>
+            <field name="product_reversal_id" ref="product_product_reversal_good_use_advance"/>
+        </record>
+        <record id="broker_branch_execution_good_quality" model="broker.branch">
+            <field name="name">EJECUCIÓN DE OBRA Y BUENA CALIDAD DE MATERIALES</field>
+            <field name="code">EBC</field>
+            <field name="code_super_cias">29</field>
+            <field name="product_id" ref="product_product_execution_good_quality"/>
+            <field name="product_reversal_id" ref="product_product_reversal_execution_good_quality"/>
+        </record>
+        <record id="broker_branch_good_use_credit" model="broker.branch">
+            <field name="name">BUEN USO DE CARTA DE CRÉDITO</field>
+            <field name="code">BCC</field>
+            <field name="code_super_cias">30</field>
+            <field name="product_id" ref="product_product_good_use_credit"/>
+            <field name="product_reversal_id" ref="product_product_reversal_good_use_credit"/>
+        </record>
+        <record id="broker_branch_custom_guarantees" model="broker.branch">
+            <field name="name">GARANTÍAS ADUANERAS</field>
+            <field name="code">GAA</field>
+            <field name="code_super_cias">31</field>
+            <field name="product_id" ref="product_product_customs"/>
+            <field name="product_reversal_id" ref="product_product_reversal_customs"/>
+        </record>
+        <record id="broker_branch_other_guarantees" model="broker.branch">
+            <field name="name">OTRAS GARANTÍAS</field>
+            <field name="code">OTG</field>
+            <field name="code_super_cias">33</field>
+            <field name="product_id" ref="product_product_other_guarantees"/>
+            <field name="product_reversal_id" ref="product_product_reversal_other_guarantees"/>
+        </record>
+        <record id="broker_branch_internal_credit" model="broker.branch">
+            <field name="name">CRÉDITO INTERNO</field>
+            <field name="code">CRI</field>
+            <field name="code_super_cias">34</field>
+            <field name="product_id" ref="product_product_internal_credit"/>
+            <field name="product_reversal_id" ref="product_product_reversal_internal_credit"/>
+        </record>
+        <record id="broker_branch_export_credit" model="broker.branch">
+            <field name="name">CRÉDITO A LAS EXPORTACIONES</field>
+            <field name="code">CRE</field>
+            <field name="code_super_cias">35</field>
+            <field name="product_id" ref="product_product_export_credit"/>
+            <field name="product_reversal_id" ref="product_product_reversal_export_credit"/>
+        </record>
+        <record id="broker_branch_financial_institution" model="broker.branch">
+            <field name="name">BANCOS E INSTITUCIONES FINANCIERAS (BBB)</field>
+            <field name="code">BIF</field>
+            <field name="code_super_cias">24</field>
+            <field name="product_id" ref="product_product_financial_institution"/>
+            <field name="product_reversal_id" ref="product_product_reversal_financial_institution"/>
+        </record>
+        <record id="broker_branch_multi_risk" model="broker.branch">
+            <field name="name">MULTIRIESGO</field>
+            <field name="code">MUL</field>
+            <field name="code_super_cias">40</field>
+            <field name="product_id" ref="product_product_multi_risk"/>
+            <field name="product_reversal_id" ref="product_product_reversal_multi_risk"/>
+        </record>
+        <record id="broker_branch_special_risk" model="broker.branch">
+            <field name="name">RIESGOS ESPECIALES</field>
+            <field name="code">RIE</field>
+            <field name="code_super_cias">26</field>
+            <field name="product_id" ref="product_product_special_risk"/>
+            <field name="product_reversal_id" ref="product_product_reversal_special_risk"/>
+        </record>
+    </data>
+</odoo>

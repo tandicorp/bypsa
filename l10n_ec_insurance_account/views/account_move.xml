@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="l10n_ec_insurance_invoice_form_inherits" model="ir.ui.view">
+            <field name="name">view_l10n_ec.insurance.invoice.form.inherit</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="l10n_ec_edi.account_move_form_invoice_and_withhold_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='l10n_ec_authorization_number']" position="before">
+                    <field name="l10n_ec_is_purchase_liquidation" invisible="1"/>
+                </xpath>
+                <xpath expr="//field[@name='l10n_ec_authorization_number']" position="attributes">
+                    <attribute name="attrs">{'invisible':['|', '|', '|', ('country_code', '!=', 'EC'),
+                                                 '&amp;', ('move_type', 'in', ('out_invoice', 'out_refund')), ('l10n_ec_authorization_number', '=', False),
+                                                 '&amp;', ('move_type', '=', 'entry'), '&amp;', ('l10n_ec_withhold_type', 'not in', ['out_withhold', 'in_withhold']), ('l10n_ec_authorization_number', '=', False),
+                                                 '&amp;', ('l10n_ec_is_purchase_liquidation', '=', True), ('l10n_ec_authorization_number', '=', False)],
+                                             'readonly':['|', ('move_type', 'not in', ('in_invoice', 'in_refund')), ('state', '!=', 'draft')]}</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
