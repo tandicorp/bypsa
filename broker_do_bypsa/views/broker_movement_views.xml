@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sale_order_form" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="broker_do.sale_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_tax_emission_rights']" position="attributes">
+                <attribute name="attrs">{'readonly': [('table_emission_rights', '!=', 'other')]}</attribute>
+                <attribute name="force_save">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_tax_emission_rights']" position="before">
+                <field name="table_emission_rights" attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
