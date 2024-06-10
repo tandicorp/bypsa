@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="broker_presettlement_form" model="ir.ui.view">
+        <field name="name">broker.presettlement.form</field>
+        <field name="model">broker.presettlement</field>
+        <field name="arch" type="xml">
+            <form string="Preliquidación">
+                <header>
+                    <button class="oe_highlight oe_stat_button" type="object" string="Generar preliquidación"
+                            name="action_generate_presettlement" icon="fa-pencil-square-o"
+                            attrs="{'invisible': [('status','=','validated')]}"/>
+                    <button class="oe_highlight oe_stat_button" type="object"
+                            string="Cargar preliquidación de aseguradora"
+                            name="action_generate_preset_insurer" icon="fa-pencil-square-o"
+                            attrs="{'invisible': [('status','=','validated')]}"/>
+                    <button class="oe_highlight oe_stat_button" type="object"
+                            string="Validar" name="action_validate" icon="fa-pencil-square-o"
+                            attrs="{'invisible': [('status','=','validated')]}"/>
+                    <button class="oe_highlight oe_stat_button" type="object"
+                            string="Volver a borrador" name="action_draft" icon="fa-pencil-square-o"
+                            attrs="{'invisible': [('status','=','draft')]}"/>
+                    <field name="status" clickable="1" widget="statusbar" statusbar_visible="draft,validated"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Nombre"/>
+                        <h1>
+                            <field name="name" string="Nombre"/>
+                        </h1>
+                    </div>
+                    <group string="Datos del contrato">
+                        <group>
+                            <field name="insurer_id"
+                                   domain="[('partner_type_id','=',%(broker_do.insurance_company_data)d)]"/>
+                            <field name="presettlement_num"/>
+                            <field name="date_end"/>
+                            <field name="amount_presettlement"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="details" string="Detalles">
+                            <button class="btn-warning oe_highlight oe_stat_button size_buttons" type="object" string="Limpiar líneas"
+                                    confirm="Esta acción no puede ser deshecha, ¿está seguro/a que desea continuar?"
+                                    name="action_reset_lines" icon="fa-pencil-square-o"
+                                    attrs="{'invisible': [('status','=','validated')]}"/>
+                            <button class="btn-info oe_highlight oe_stat_button size_buttons" type="object" string="Resolver a favor de la aseguradora"
+                                    confirm="Esta acción ajustará todas las diferencias a favor de la aseguradora, modificando la comisión de manera permanente, ¿está seguro/a que desea continuar?"
+                                    name="action_resolve_for_insurer" icon="fa-pencil-square-o"
+                                    attrs="{'invisible': [('status','=','validated')]}"/>
+                            <button class="btn-outline-primary size_buttons" type="object" string="Crear comisiones"
+                                    name="action_create_commission"
+                                    attrs="{'invisible': [('status','=','validated')]}"/>
+                            <field name="presettlement_line_ids" force_save="1"
+                                   options="{'no_create': True,'no_create_edit': True, 'no_quick_create': True}"
+                                   widget="section_and_note_one2many" attrs="{'readonly': [('status','=','validated')]}">
+                                <tree string="Detalles" editable="bottom">
+                                    <control>
+                                        <create name="add_line_control" string="Añadir línea"/>
+                                        <create name="add_section_control" string="Añadir sección"
+                                                context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Añadir nota"
+                                                context="{'default_display_type': 'line_note'}"/>
+                                    </control>
+                                    <field name="sequence" force_save="1" invisible="1"/>
+                                    <field name="display_type" force_save="1" invisible="1"/>
+                                    <field name="name" widget="section_and_note_text" optional="hide"/>
+                                    <field name="branch_id" readonly="1"/>
+                                    <field name="commission_id" domain="[('order_id.contract_id','=',contract_id)]" options="{'no_create': True}"/>
+                                    <field name="contract_id"/>
+                                    <field name="invoice_number"/>
+                                    <field name="contract_num_excel" readonly="1" optional="hide"/>
+                                    <field name="type_contract_excel" readonly="1" optional="hide"/>
+                                    <field name="fee_num_seq_excel" readonly="1" optional="hide"/>
+                                    <field name="amount_insurer" sum="Total preliquidación aseguradora"/>
+                                    <field name="amount_commission" force_save="1" readonly="1" sum="Total comisión esperada"/>
+                                    <field name="amount_difference" force_save="1" sum="Total diferencias"/>
+                                    <field name="commission_to_adjust" widget="boolean_toggle"/>
+                                    <field name="create_commission" widget="boolean_toggle"/>
+                                    <button name="action_create_commission" icon="fa-pencil-square-o"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="broker_presettlement_tree" model="ir.ui.view">
+        <field name="name">broker.presettlement.tree</field>
+        <field name="model">broker.presettlement</field>
+        <field name="arch" type="xml">
+            <tree string="Preliquidaciones">
+                <field name="name"/>
+                <field name="insurer_id"/>
+                <field name="date_end"/>
+                <field name="amount_presettlement"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="broker_presettlement_action" model="ir.actions.act_window">
+        <field name="name">Preliquidaciones</field>
+        <field name="res_model">broker.presettlement</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Ingrese una nueva configuración de preliquidaciones
+            </p>
+            <p>
+                Use este menu para la configuración de preliquidaciones.
+            </p>
+        </field>
+    </record>
+
+</odoo>

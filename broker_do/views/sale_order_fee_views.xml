@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sale_order_fee_movement_form" model="ir.ui.view">
+        <field name="name">sale.order.fee.movement.form</field>
+        <field name="model">broker.contract.fee</field>
+        <field name="arch" type="xml">
+            <form string="Cuotas">
+                <header>
+                    <field name="status_fee" widget="statusbar" statusbar_visible="no_payment,partial_payment,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Nombre"/>
+                        <h1>
+                            <field name="name" string="Nombre"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Montos de la cuota / comisión">
+                            <field name="contract_id" readonly="1"/>
+                            <field name="sequence" readonly="1"/>
+                            <field name="provisional_payment_date"/>
+                            <field name="invoice_number"/>
+                            <field name="amount_insurance_due" attrs="{'readonly': [('status_fee','=', 'paid')]}"/>
+                            <field name="amount_insurance_due_negative" attrs="{'readonly': [('status_fee','=', 'paid')]}"/>
+                            <field name="balance_due" readonly="1" force_save="1"/>
+                            <field name="balance_due_negative" readonly="1" force_save="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Pagos realizados">
+                            <field name="payment_ids" force_save="1" readonly="1" context="{'form_view_ref': 'broker_do.fee_payment_form'}">
+                                <tree string="Pagos de cuotas">
+                                    <field name="name"/>
+                                    <field name="date_payment"/>
+                                    <field name="status"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Cruces">
+                            <group>
+                            <group string="Por Cobrar">
+                                <field name="positive_quota_cross_ids" no_label="1" readonly="1"
+                                       options="{'no_open': True, 'no_create': True}">
+                                    <tree editable="bottom" no_label="1" create="false" import="false" delete="false"
+                                          sample="1">
+                                        <field name="contract_fee_id" readonly="1" force_save="1"/>
+                                        <field name="value" sum="Total Valor" readonly="1" force_save="1"/>
+                                        <field name="value_cross" sum="Total Cruce" force_save="1" />
+                                        <field name="balance" sum="Total Saldo" readonly="1" force_save="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <group string="Por Pagar">
+                                <field name="negative_quota_cross_ids" no_label="1" readonly="1"
+                                       options="{'no_open': True, 'no_create': True}" >
+                                    <tree editable="bottom" no_label="1" create="false" import="false" delete="false"
+                                          sample="1">
+                                        <field name="contract_fee_id" readonly="1" force_save="1"/>
+                                        <field name="value" sum="Total Valor" readonly="1" force_save="1"/>
+                                        <field name="value_cross" sum="Total Cruce" force_save="1"/>
+                                        <field name="balance" sum="Total Saldo" readonly="1" force_save="1"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sale_order_fee_movement_tree" model="ir.ui.view">
+        <field name="name">sale.order.fee.movement.tree</field>
+        <field name="model">broker.contract.fee</field>
+        <field name="arch" type="xml">
+            <tree string="Cuotas" default_order="provisional_payment_date, sequence">
+                <field name="sequence"/>
+                <field name="contract_id"/>
+                <field name="partner_contract_id"/>
+                <field name="provisional_payment_date"/>
+                <field name="invoice_number"/>
+                <field name="amount_insurance_due"/>
+                <field name="amount_insurance_due_negative"/>
+                <field name="balance_due"/>
+                <field name="status_fee"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="sale_order_fee_commission_tree" model="ir.ui.view">
+        <field name="name">sale.order.fee.commission.tree</field>
+        <field name="model">broker.contract.fee</field>
+        <field name="arch" type="xml">
+            <tree string="Comisiones" default_order="provisional_payment_date, sequence">
+                <field name="sequence"/>
+                <field name="contract_id"/>
+                <field name="amount_insurance_due"/>
+                <field name="amount_insurance_due_negative"/>
+                <field name="balance_due"/>
+                <field name="status_fee"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="sale_order_fee_search" model="ir.ui.view">
+        <field name="name">broker.contract.fee.search</field>
+        <field name="model">broker.contract.fee</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="contract_id"/>
+                <field name="provisional_payment_date"/>
+                <filter string="Vencimiento semanal" name="current_week"
+                        domain="[('provisional_payment_date', '&lt;=',  (context_today()+relativedelta(weeks=0, weekday=1)).strftime('%Y-%m-%d')),
+                        ('provisional_payment_date', '&gt;=',  context_today().strftime('%Y-%m-%d')), ('status_fee','!=','paid')]"/>
+                <filter string="Vencidas hasta hoy" name="past_fee"
+                        domain="[('provisional_payment_date', '&lt;=', context_today().strftime('%Y-%m-%d')), ('status_fee','!=','paid')]"/>
+                <group expand="0" name="group_by" string="Group By">
+                	<filter name="group_by_status_fee" string="Estado de cobro de cuota " domain="[]" context="{'group_by': 'status_fee'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+    <record id="sale_order_fee_action" model="ir.actions.act_window">
+        <field name="name">Cuotas del contrato</field>
+        <field name="res_model">broker.contract.fee</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="sale_order_fee_movement_tree"/>
+        <field name="search_view_id" ref="sale_order_fee_search"/>
+    </record>
+
+</odoo>

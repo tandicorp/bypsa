@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="fee_payment_form" model="ir.ui.view">
+        <field name="name">fee.payment.form</field>
+        <field name="model">fee.payment</field>
+        <field name="arch" type="xml">
+            <form string="Pagos">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,paid"/>
+                    <button class="oe_highlight oe_stat_button" type="object" string="Registrar pago"
+                            attrs="{'invisible': [('status','!=', 'draft')]}"
+                            name="action_pay_fee">
+                    </button>
+                    <button name="action_load_fee" string="Cargar cobros realizados en aseguradora" type="object" class="oe_highlight"
+                                attrs="{'invisible': [('status', '!=', 'draft')]}" data-hotkey="r"/>
+                    <button class="oe_stat_button" type="object" string="Regresar a borrador"
+                            attrs="{'invisible': [('status','=', 'draft')]}"
+                            name="action_draft">
+                    </button>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <h1>
+                                <label for="name" string="Pago"/>
+                            </h1>
+                            <field name="name" attrs="{'readonly': [('status','!=', 'draft')]}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" attrs="{'readonly': [('status','!=', 'draft')]}"/>
+                            <field name="date_payment" attrs="{'readonly': [('status','!=', 'draft')]}"/>
+                            <field name="payment_ref"/>
+                            <field name="comment"/>
+                        </group>
+                    </group>
+                    <notebook name="pagos">
+                        <page string="Cuotas">
+                            <field name="sale_fee_payment_ids" attrs="{'readonly': [('status','!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="fee_id" options="{'no_create': True}"
+                                           domain="[('status_fee','!=','paid'), ('contract_id.client_id','=',parent.partner_id)]"/>
+                                    <field name="amount_paid"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="fee_payment_tree" model="ir.ui.view">
+        <field name="name">fee.payment.tree</field>
+        <field name="model">fee.payment</field>
+        <field name="arch" type="xml">
+            <tree string="Cuotas">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="date_payment"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="fee_payment_action" model="ir.actions.act_window">
+        <field name="name">Pago de cuotas de contrato</field>
+        <field name="res_model">fee.payment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Ingrese un Pago de cuotas de contratos
+            </p>
+        </field>
+    </record>
+
+</odoo>

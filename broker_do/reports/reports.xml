@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="action_report_broker_movement_object_comparison" model="ir.actions.report">
+            <field name="name">Reporte Comparativa</field>
+            <field name="model">broker.movement.object</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">broker_do.report_broker_movement_object_comparison</field>
+            <field name="report_file">broker_do.report_broker_movement_object_comparison</field>
+            <field name="binding_model_id" ref="broker_do.model_broker_movement_object"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <record id="action_report_receipt_fee_payment" model="ir.actions.report">
+            <field name="name">Recibo de Cobros</field>
+            <field name="model">fee.payment</field>
+            <field name="report_type">xlsx</field>
+            <field name="report_name">broker_do.report_receipt_fee_payment</field>
+            <field name="report_file">broker_do.report_receipt_fee_payment</field>
+            <field name="binding_model_id" ref="broker_do.model_fee_payment"/>
+            <field name="binding_type">report</field>
+        </record>
+    </data>
+</odoo>
