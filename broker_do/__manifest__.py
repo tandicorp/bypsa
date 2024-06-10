@@ -30,6 +30,7 @@
         'data/mail_templates.xml',
         'data/broker_business_data.xml',
         'data/ir_sequence_data.xml',
+		'data/product_reversal_product_data.xml',
 		'data/broker_branch_data.xml',
         'data/broker_movement_branch_data.xml',
         'security/res_groups.xml',
@@ -69,7 +70,6 @@
         'views/broker_contract_deductible_template_view.xml',
         'reports/reports.xml',
         'views/broker_menu_views.xml',
-        'data/product_reversal_product_data.xml',
     ], 'assets': {
         'web.assets_backend': [
             'broker_do/static/src/components/*/*.xml',
