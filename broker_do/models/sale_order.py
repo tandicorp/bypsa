@@ -250,7 +250,7 @@ class SaleOrder(models.Model):
         for record in self:
             record.amount_fee_subtotal = sum([record.amount_fee, record.amount_tax_insurance_peasant,
                                               record.amount_tax_super_cias, record.amount_tax_emission_rights])
-            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
+            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch, raise_if_not_found=False) for branch in
                                                   _branches_no_taxes]:
                 amount_taxes = self.env.user.company_id.account_sale_tax_id.compute_all(record.amount_fee_subtotal)
                 record.amount_tax_iva = amount_taxes['taxes'][0]['amount']
