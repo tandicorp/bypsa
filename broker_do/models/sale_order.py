@@ -267,7 +267,7 @@ class SaleOrder(models.Model):
         for this in self:
             insurer_shortname = this.contract_id and this.contract_id.insurer_id.shortname or ""
             type_code = this.type_id and this.type_id.code or ""
-            this.name = " - ".join([insurer_shortname, this.contract_id.name]) + " | " + " - ".join(
+            this.name = " - ".join([insurer_shortname, this.contract_id.name or '']) + " | " + " - ".join(
                 [type_code, str(this.sequence)])
 
     @api.onchange('amount_fee', 'amount_tax_insurance_peasant', 'amount_tax_super_cias', 'amount_tax_iva',
