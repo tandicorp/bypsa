@@ -320,7 +320,7 @@ class SaleOrder(models.Model):
                     mount_due = equal_mount_due
                     if type_taxes == 'first_fee' and index == 0:
                         mount_due = equal_mount_fee + sum([self[tax] for tax in taxes])
-                        equal_mount_due = (residual_amount_due - mount_due) / (period_num - 1)
+                        equal_mount_due = (residual_amount_due - mount_due) / period_num
                     val.update(
                         {
                             'amount_insurance_due': float_round(mount_due, decimal_places, rounding_method='HALF-DOWN'),
@@ -372,6 +372,9 @@ class SaleOrder(models.Model):
             self.fee_line_ids = [fields.Command.create(val) for val in fee_line_ids]
             self.contract_id._onchange_contract_fee_ids()
             self.warning_flag = True
+        else:
+            raise ValidationError(u'El movimiento no se encuentra en estado "Borrador", por esto no se puede '
+                                  u'recalcular las cuotas.')
 
     def action_open_movement(self):
         template = self.env.ref('broker_do.sale_order_form')
@@ -385,24 +388,24 @@ class SaleOrder(models.Model):
 
     def action_insurance_release(self):
         self.ensure_one()
-        if self.amount_fee != sum(self.fee_line_ids.mapped('amount_insurance_fee')):
+        if self.amount_fee != abs(sum(self.fee_line_ids.mapped('amount_insurance_fee'))):
             raise ValidationError(u'Las cuotas del movimiento no suman lo mismo que el total de la prima.')
         template_movement_branch = self.env['broker.movement.branch'].sudo().search(
             [('branch_id', '=', self.contract_id.branch_id.id), ('type_id', '=', self.type_id.id)])
-        if not template_movement_branch or not template_movement_branch.mail_template_id:
-            msg = (u"La configuración de plantilla de movimiento está incompleta, se requiere configurar correctamente "
-                   u"la plantilla para el ramo {branch} y el movimiento {type} en el menú "
-                   u"BrokerDo/Configuración/Plantilla de movimiento").format(
-                branch=self.contract_id.branch_id.name, type=self.type_id.name
-            )
-            raise ValidationError(msg)
-        template = template_movement_branch.mail_template_id
+        # if not template_movement_branch or not template_movement_branch.mail_template_id:
+        #     msg = (u"La configuración de plantilla de movimiento está incompleta, se requiere configurar correctamente "
+        #            u"la plantilla para el ramo {branch} y el movimiento {type} en el menú "
+        #            u"BrokerDo/Configuración/Plantilla de movimiento").format(
+        #         branch=self.contract_id.branch_id.name, type=self.type_id.name
+        #     )
+        #     raise ValidationError(msg)
+        template = template_movement_branch.mail_template_id or False
         compose_form = self.env.ref('mail.email_compose_message_wizard_form', False)
         ctx = dict(
             default_model='sale.order',
             default_res_id=self.id,
             default_use_template=bool(template),
-            default_template_id=template and template.id,
+            default_template_id=template and template.id or False,
             default_composition_mode='comment',
             default_email_layout_xmlid='mail.mail_notification_light',
             mark_coupon_as_sent=True,
@@ -462,7 +465,7 @@ class SaleOrder(models.Model):
             fee_id.invoice_number = self.invoice_number
 
     def action_release_move(self):
-        if self.amount_fee != sum(self.fee_line_ids.mapped('amount_insurance_fee')):
+        if self.amount_fee != abs(sum(self.fee_line_ids.mapped('amount_insurance_fee'))):
             raise ValidationError(u'Las cuotas del movimiento no suman lo mismo que el total de la prima.')
         self.status_movement = 'insurance_release'
 
