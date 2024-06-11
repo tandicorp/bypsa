@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import ValidationError
 from itertools import groupby
@@ -366,7 +367,7 @@ class BrokerContract(models.Model):
         self.ensure_one()
         if not self.period_ids:
             raise ValidationError("Error deben existir periodos asociados al contrato")
-        period = self.period_ids.filtered(lambda period: period.date_from >= date <= period.date_to)
+        period = self.period_ids.filtered(lambda period: period.date_from <= date <= period.date_to).sorted('date_from')
         if not period:
             raise ValidationError("Periodo no encontrado para la fecha: {date}".format(date=str(date)))
         return period[0].id

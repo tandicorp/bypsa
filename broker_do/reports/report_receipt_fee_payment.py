@@ -1,4 +1,17 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import fields, models, api
+import odoo.tools.image as image
+import io
+
+
+def image_decode(companylogo):
+    """Retorna el logo de la compañia redimencionado en formato bmp"""
+    sm_image = image.base64_to_image(companylogo)
+    image_bytes = io.BytesIO()
+    sm_image.save(image_bytes, format='bmp')
+    return image_bytes
 
 
 class ModelName(models.AbstractModel):
@@ -15,10 +28,15 @@ class ModelName(models.AbstractModel):
             sheet.merge_range(0, 0, 1, 8, "RECIBO DE COBROS", title_format)
             sheet.write(2, 0, "Recibo No", title_format)
             sheet.merge_range(2, 1, 2, 2, fee_payment_id.payment_ref, title_format)
+            sheet.write(2, 0, "Recibo No", title_format)
+            image_bytes = image_decode(self.env.user.company_id.logo)
+            sheet.insert_image("H3", image_bytes.getvalue())
             sheet.write(3, 0, "Fecha de Emisión", title_format)
             sheet.merge_range(3, 1, 3, 2, str(fee_payment_id.date_payment or ""), title_format)
-            sheet.write(4, 0, "Asegurado", title_format)
+            sheet.write(4, 0, "Asegurado:", title_format)
             sheet.merge_range(4, 1, 4, 2, fee_payment_id.partner_id.name, title_format)
+            sheet.write(5, 0, "Contratante:", title_format)
+            sheet.merge_range(5, 1, 5, 2, fee_payment_id.partner_id.name, title_format)
             sheet.write(6, 0, "Cuota #", title_format)
             sheet.write(6, 1, "Ramo", title_format)
             sheet.write(6, 2, "Póliza #", title_format)
@@ -33,13 +51,13 @@ class ModelName(models.AbstractModel):
         merge_format = workbook.add_format({'align': 'left',
                                             'bold': True,
                                             'font_size': 8,
-                                            'bg_color': '#FFFFCC',
+                                            #'bg_color': '#FFFFCC',
                                             'border': True
                                             })
         title_format = workbook.add_format({'align': 'center',
                                             'bold': True,
                                             'font_size': 8,
-                                            'bg_color': '#CCFFFF',
+                                            #'bg_color': '#CCFFFF',
                                             'border': True
                                             })
         sheet = workbook.add_worksheet('Recibo de Cobros')
