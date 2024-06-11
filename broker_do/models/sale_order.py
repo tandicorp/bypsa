@@ -236,12 +236,14 @@ class SaleOrder(models.Model):
     @api.depends("amount_fee")
     def _compute_amount_taxes_insurance(self):
         for record in self:
-            amount_taxes = self.env.user.company_id.tax_insurance_peasant_id.compute_all(record.amount_fee)
-            record.amount_tax_insurance_peasant = amount_taxes['taxes'][0]['amount']
-            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch) for branch in
+            if self.env.user.company_id.tax_insurance_peasant_id:
+                amount_taxes = self.env.user.company_id.tax_insurance_peasant_id.compute_all(record.amount_fee)
+                record.amount_tax_insurance_peasant = amount_taxes['taxes'][0]['amount']
+            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch, raise_if_not_found=False) for branch in
                                                   _branches_medical_assistance]:
-                amount_taxes = self.env.user.company_id.tax_super_cias_id.compute_all(record.amount_fee)
-                record.amount_tax_super_cias = amount_taxes['taxes'][0]['amount']
+                if self.env.user.company_id.tax_super_cias_id:
+                    amount_taxes = self.env.user.company_id.tax_super_cias_id.compute_all(record.amount_fee)
+                    record.amount_tax_super_cias = amount_taxes['taxes'][0]['amount']
 
     @api.depends("amount_fee", "amount_tax_insurance_peasant", "amount_tax_super_cias", "amount_tax_emission_rights")
     def _compute_amount_fee_subtotal(self):
