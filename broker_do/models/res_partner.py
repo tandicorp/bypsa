@@ -116,7 +116,7 @@ class ResPartner(models.Model):
 
     @api.onchange('full_name', 'full_lastname')
     def onchange_names(self):
-        fields = ['full_name', 'full_lastname']
+        fields = ['full_lastname', 'full_name']
         self.full_name = self.full_name and self.full_name.upper() or ''
         self.full_lastname = self.full_lastname and self.full_lastname.upper() or ''
         onchange_data = [self[f] for f in fields if self[f]]
