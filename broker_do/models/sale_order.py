@@ -155,7 +155,7 @@ class SaleOrder(models.Model):
     contract_num = fields.Char(
         related="contract_id.contract_num",
         inverse="_set_contract_num",
-        string="Contrato"
+        string="No. de Contrato"
     )
     type_id = fields.Many2one(
         "sale.order.type",

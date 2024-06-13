@@ -147,8 +147,7 @@ class CrmLead(models.Model):
             "lead_id": self.id,
             "business_id": self.business_id.id,
             "version": 1,
-            "agreement_ids": [fields.Command.set([agree for agree in agreements])
-                              ],
+            "agreement_ids": [fields.Command.set([agree for agree in agreements])],
             "movement_ids": [line_contract]
         }
         if self.renewal_id:
