@@ -378,6 +378,9 @@ class SaleOrder(models.Model):
             raise ValidationError(u'El movimiento no se encuentra en estado "Borrador", por esto no se puede '
                                   u'recalcular las cuotas.')
 
+    def action_recalculate_fee(self):
+        self.contract_id._onchange_contract_fee_ids()
+
     def action_open_movement(self):
         template = self.env.ref('broker_do.sale_order_form')
         return {

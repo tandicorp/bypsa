@@ -89,9 +89,10 @@ class SaleOrderLine(models.Model):
     @api.depends('sequence')
     def _compute_name(self):
         for record in self:
-            record.name = record.order_id.contract_id.client_id.name + '/ ' + ':'.join(
-                ['P.NETA', str(record.order_id.amount_fee) or '',
-                 str((record.order_id.commission_percentage or 0) * 100) + '%'])
+            if record.order_id.contract_id and record.order_id.contract_id.client_id:
+                record.name = record.order_id.contract_id.client_id.name + '/ ' + ':'.join(
+                    ['P.NETA', str(record.order_id.amount_fee) or '',
+                     str((record.order_id.commission_percentage or 0) * 100) + '%'])
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
     def _compute_amount(self):

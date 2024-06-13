@@ -115,6 +115,8 @@
                     <button type="object" name="action_set_invoice_number" string="Establecer num. factura"
                             class="oe_highlight oe_stat_button size_buttons" icon="fa-file-text"
                             confirm="Esta acción establece el número de factura en todas las cuotas, ¿está seguro/a que desea continuar?"/>
+                    <button type="object" name="action_recalculate_fee" string="Recalcular cuotas de cartera"
+                            class="oe_highlight oe_stat_button size_buttons" icon="fa-file-text"/>
                     <notebook>
                         <page string="Cuotas">
                             <field name="fee_line_ids" force_save="1">

@@ -208,9 +208,14 @@ class BrokerContract(models.Model):
 
     def _onchange_contract_fee_ids(self):
         for record in self:
+            if record.contract_fee_ids.filtered(lambda x: x.status_fee != 'no_payment'):
+                raise ValidationError(
+                    u"No se puede recomputar cuotas que ya han sido pagadas, por favor identifíquelas y cancele los "
+                    u"pagos y cruces antes de proceder con el recálculo de las cuotas de cartera."
+                )
             record = record._origin if record._origin else record
-            record.contract_fee_ids = [fields.Command.delete(fee_id.id) for fee_id in
-                                       record.contract_fee_ids.filtered(lambda x: x.status_fee == 'no_payment')]
+            contract_fee_ids_operations = [fields.Command.delete(fee_id.id) for fee_id in
+                                           record.contract_fee_ids.filtered(lambda x: x.status_fee == 'no_payment')]
             fee_line_ids = record.movement_ids.mapped('fee_line_ids').filtered(lambda x: x.status_fee == 'no_payment')
             list_create = []
             if fee_line_ids:
@@ -238,7 +243,8 @@ class BrokerContract(models.Model):
                         "fee_line_ids": [fields.Command.set([line.id for line in fee_lines])]
                     }
                     list_create.append(fields.Command.create(res))
-            record.contract_fee_ids = list_create
+            contract_fee_ids_operations.extend(list_create)
+            record.contract_fee_ids = contract_fee_ids_operations
             record.contract_fee_ids._compute_quotas_positive_negative()
 
     def _compute_stakeholder_ids(self):
@@ -399,6 +405,7 @@ class BrokerContract(models.Model):
     def action_draft(self):
         for record in self:
             record.state = 'draft'
+
 
 class BrokerContractFee(models.Model):
     _name = 'broker.contract.fee'

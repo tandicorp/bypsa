@@ -128,7 +128,7 @@ class CrmLead(models.Model):
         type_pol = self.env.ref("broker_do.policy_movement")
         contract_obj = self.env['broker.contract']
         date_start = fields.Date.today()
-        date_end = date_start + relativedelta(years=1, days=-1)
+        date_end = date_start + relativedelta(years=1)
         line_contract = fields.Command.create({
             "type_id": type_pol.id,
             "amount_fee": value,
@@ -161,6 +161,7 @@ class CrmLead(models.Model):
         current_contract = contract_obj.create(contract_data)
         current_contract.onchange_insurance_company()
         current_contract.movement_ids[0].onchange_amounts_for_commission()
+        current_contract._onchange_type_period()
         current_contract.movement_ids[0].action_calculate_fee()
         return current_contract
 
