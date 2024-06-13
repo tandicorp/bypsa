@@ -301,9 +301,10 @@ class SaleOrder(models.Model):
                      'provisional_payment_date': first_date,
                      'period_id': self.contract_id.get_period_from_date(first_date),
                      }]
-                range_period = range(init_seq + 1, num_period)
+                range_period = range(init_seq, num_period - 1)
+            init_len = len(list_due)
             list_due.extend([
-                {'sequence': i + 1,
+                {'sequence': i + 1 + init_len,
                  'provisional_payment_date': date_start + delta(i),
                  'period_id': self.contract_id.get_period_from_date(date_start + delta(i)),
                  } for i in range_period
