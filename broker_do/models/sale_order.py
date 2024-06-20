@@ -83,7 +83,7 @@ class SaleOrder(models.Model):
         tracking=True
     )
     amount_due = fields.Float(
-        string='Cuota total',
+        string='Prima total',
         tracking=True
     )
     commission_percentage = fields.Float(
