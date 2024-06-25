@@ -170,6 +170,18 @@ class BrokerContract(models.Model):
         string="Periodos"
     )
 
+    def unlink(self):
+        """Control para no eliminar polizas que no estan en borrador"""
+        not_draft_contract_ids = self.filtered(lambda record: record.state != 'draft')
+        if not_draft_contract_ids:
+            raise ValidationError(
+                u'No se puede eliminar contratos que no esten en estado borrador.'
+                u'\nLos contratos que no estan en borrador son: \n-\t{}'.format(
+                    '\n-\t'.join(not_draft_contract_ids.mapped('name'))
+                )
+            )
+        return super(BrokerContract, self).unlink()
+
     @api.onchange("period_type", "date_start", "date_end")
     def _onchange_type_period(self):
         def distance_month(date_start, date_end):
@@ -251,7 +263,7 @@ class BrokerContract(models.Model):
         for record in self:
             record.stakeholder_ids = [Command.set(record.movement_ids.mapped('stakeholder_ids').ids)]
 
-    @api.depends("branch_id", "contract_num")
+    @api.depends("branch_id", "contract_num", "version")
     def _compute_name(self):
         for this in self:
             branch_code = this.branch_id and this.branch_id.code or ""
@@ -300,9 +312,9 @@ class BrokerContract(models.Model):
                     'percentage_value')
                 self.commission_percentage = perc_value and sum(perc_value) or self.commission_percentage or 0
             else:
-                raise ValidationError(
-                    "No Existe un contrato de agenciamiento asociado con la aseguradora {insurer}".format(
-                        insurer=self.insurer_id.name))
+                res['warning'] = {'title': 'Advertencia', 'message':
+                    "No existe un contrato de agenciamiento asociado con la aseguradora {insurer}".format(
+                        insurer=self.insurer_id.name)}
 
         return res
 
@@ -417,6 +429,7 @@ class BrokerContractFee(models.Model):
     )
     period_id = fields.Many2one(
         "broker.contract.period",
+        ondelete='restrict',
         string="Periodo"
     )
     period_date_from = fields.Date(
@@ -437,6 +450,7 @@ class BrokerContractFee(models.Model):
     )
     contract_id = fields.Many2one(
         'broker.contract',
+        ondelete='cascade',
         name="Contrato"
     )
     amount_insurance_due = fields.Float(
@@ -468,6 +482,8 @@ class BrokerContractFee(models.Model):
     partner_contract_id = fields.Many2one(
         'res.partner',
         related='contract_id.client_id',
+        ondelete='restrict',
+        store=True
     )
     fee_line_ids = fields.One2many(
         'sale.order.fee',
@@ -488,6 +504,7 @@ class BrokerContractFee(models.Model):
         'contract_fee_id',
         'payment_id',
         string='Contratos',
+        ondelete='restrict',
     )
     positive_quota_cross_ids = fields.One2many(
         'broker.quota.cross.positive',
@@ -571,5 +588,6 @@ class BrokerContractPeriod(models.Model):
     )
     contract_id = fields.Many2one(
         "broker.contract",
+        ondelete='cascade',
         string="Contrato Asociado"
     )

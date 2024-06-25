@@ -110,15 +110,21 @@
                         </h1>
                     </div>
                     <group col="3">
-                        <group string="Información del contrato" colspan="2">
-                            <group>
+                        <group colspan="2">
+                            <group colspan="4">
                                 <field name="client_id"
                                        domain="[('partner_type_id','!=',%(broker_do.insurance_company_data)d)]"
-                                       attrs="{'readonly': [('state','!=','draft')]}"
-                                />
+                                       attrs="{'readonly': [('state','!=','draft')]}"/>
                                 <field name="insurer_id"
                                        domain="[('partner_type_id','=',%(broker_do.insurance_company_data)d)]"
                                        attrs="{'readonly': [('state','!=','draft')]}"/>
+                            </group>
+                        </group>
+                        <group/>
+                    </group>
+                    <group col="3">
+                        <group string="Información del contrato" colspan="2">
+                            <group>
                                 <field name="contract_num" attrs="{'readonly': [('state','!=','draft')]}"/>
                                 <field name="version" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
                                 <field name="commission_insurer_id" invisible="1"
@@ -126,6 +132,7 @@
                                 <field name="container_id" string="Póliza maestra"
                                        attrs="{'readonly': [('state','!=','draft')]}"/>
                                 <field name="annex_num" attrs="{'invisible': [('container_id','=',False)], 'readonly': [('state','!=','draft')]}"/>
+                                <field name="num_insured_items" attrs="{'readonly': [('state','!=','draft')]}"/>
                             </group>
                             <group>
                                 <field name="branch_id" options="{'no_create': True}"
@@ -134,7 +141,6 @@
                                        attrs="{'readonly': [('state','!=','draft')]}"/>
                                 <field name="commission_percentage" widget="percentage"
                                        attrs="{'readonly': [('state','!=','draft')]}"/>
-                                <field name="num_insured_items" attrs="{'readonly': [('state','!=','draft')]}"/>
                             </group>
                         </group>
                         <group string="Fecha de vigencia">
@@ -168,8 +174,8 @@
                                     <field name="number_period" invisible="1" force_save="1"/>
                                     <field name="payment_period" invisible="1" force_save="1"/>/>
                                     <field name="amount_fee" sum="Total prima neta"/>
-                                    <field name="amount_tax_insurance_peasant"/>
                                     <field name="amount_tax_super_cias"/>
+                                    <field name="amount_tax_insurance_peasant"/>
                                     <field name="amount_tax_emission_rights"/>
                                     <field name="amount_fee_subtotal"/>
                                     <field name="amount_tax_iva" readonly="0"/>
@@ -187,9 +193,9 @@
                             <field name="contract_fee_ids" readonly="1" force_save="1">
                                 <tree string="Cuotas">
                                     <field name="sequence"/>
-                                    <field name="period_id"/>
-                                    <field name="period_date_from"/>
-                                    <field name="period_date_to"/>
+                                    <field name="period_id" optional="hide"/>
+                                    <field name="period_date_from" optional="hide"/>
+                                    <field name="period_date_to" optional="hide"/>
                                     <field name="provisional_payment_date"/>
                                     <field name="amount_insurance_due"/>
                                     <field name="amount_insurance_due_negative"/>
@@ -354,6 +360,16 @@
         <field name="binding_view_types">form,list</field>
         <field name="state">code</field>
         <field name="code">action = records.create_renewal_contract()</field>
+    </record>
+
+    <!--    Acciones de servidor-->
+    <record id="model_broker_contract_renewal" model="ir.actions.server">
+        <field name="name">Vincular a póliza maestra</field>
+        <field name="model_id" ref="broker_do.model_broker_contract"/>
+        <field name="binding_model_id" ref="broker_do.model_broker_contract"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.link_to_container()</field>
     </record>
 
 </odoo>

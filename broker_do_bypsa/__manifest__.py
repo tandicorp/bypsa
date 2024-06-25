@@ -15,6 +15,7 @@
     'data': [
         'data/broker_movement_branch_data.xml',
         'views/broker_movement_views.xml',
+        'views/broker_contract_views.xml',
     ],
     'assets': {
     },

@@ -120,17 +120,17 @@
                     <notebook>
                         <page string="Cuotas">
                             <field name="fee_line_ids" force_save="1">
-                                <tree string="Cuotas">
-                                    <field name="sequence"/>
-                                    <field name="period_id"/>
-                                    <field name="period_date_from"/>
-                                    <field name="period_date_to"/>
+                                <tree string="Cuotas" editable="bottom">
+                                    <field name="sequence" readonly="1"/>
+                                    <field name="period_id" optional="hide"/>
+                                    <field name="period_date_from" optional="hide"/>
+                                    <field name="period_date_to" optional="hide"/>
                                     <field name="partner_contract_id"/>
                                     <field name="provisional_payment_date"/>
                                     <field name="invoice_number"/>
                                     <field name="amount_insurance_fee"/>
                                     <field name="amount_insurance_due"/>
-                                    <field name="status_fee"/>
+                                    <field name="status_fee" readonly="1"/>
                                 </tree>
                             </field>
                         </page>

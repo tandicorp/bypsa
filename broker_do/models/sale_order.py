@@ -25,7 +25,7 @@ class SaleOrder(models.Model):
         compute='_compute_name'
     )
     sequence = fields.Integer(
-        string="Secuencia",
+        string="No. de endoso",
         default=lambda x: int(x.id),
         tracking=True
     )

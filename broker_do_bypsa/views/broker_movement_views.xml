@@ -11,7 +11,38 @@
                 <attribute name="force_save">1</attribute>
             </xpath>
             <xpath expr="//field[@name='amount_tax_emission_rights']" position="before">
-                <field name="table_emission_rights" attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
+                <field name="table_emission_rights"
+                       attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
+            </xpath>
+            <xpath expr="//page[@name='Objetos Asegurados']" position="replace"/>
+            <xpath expr="//page[1]" position="before">
+                <page name="Objetos Asegurados">
+                    <div class="oe_inline">
+                        <button name="import_object_data" type="object" string="Importar Objetos"
+                                class="oe_highlight float-end" icon="fa-upload"/>
+                        <button name="export_object_data" type="object" string="Descargar Formato"
+                                class="oe_highlight float-end" icon="fa-download"/>
+                    </div>
+                    <field name="object_line_ids">
+                        <tree>
+                            <field name="name"/>
+                            <field name="type"/>
+                            <field name="amount_insured"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//page[last()]" position="replace"/>
+            <xpath expr="//field[@name='sequence']" position="attributes">
+                <attribute name="string">Número de endoso</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_invoice']" position="replace"/>
+            <xpath expr="//field[@name='date_next_payment']" position="replace"/>
+            <xpath expr="//field[@name='taxes_calculation']" position="before">
+                <field name="date_invoice"
+                       attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
+                <field name="date_next_payment"
+                       attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
             </xpath>
         </field>
     </record>

@@ -33,11 +33,12 @@ class SaleOrderFee(models.Model):
     partner_contract_id = fields.Many2one(
         'res.partner',
         string=u'Cliente',
-        compute='_compute_contract_id'
+        compute='_compute_contract_id',
     )
     movement_id = fields.Many2one(
         'sale.order',
-        string='Movimento de contrato'
+        string='Movimento de contrato',
+        ondelete='cascade',
     )
     provisional_payment_date = fields.Date(
         string='Fecha prevista de pago'
@@ -229,6 +230,7 @@ class SaleOrderFeePayment(models.Model):
     fee_id = fields.Many2one(
         'broker.contract.fee',
         required=True,
+        ondelete='cascade',
         string='Cuota del contrato'
     )
     amount_paid = fields.Float(
