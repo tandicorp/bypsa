@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.WidgetType" owl="1">
+          <t t-if="props.readonly">
+              <t t-if="state.typeField == 'date'">
+                   <span t-esc="formattedValue"/>
+              </t>
+              <t t-if="state.typeField == 'integer'">
+                   <span t-esc="formattedValueInteger"/>
+              </t>
+              <t t-if="state.typeField == 'float'">
+                   <span t-esc="formattedValueFloat"/>
+              </t>
+              <t t-if="state.typeField == 'char'">
+                <span t-esc="formattedValueChar"/>
+              </t>
+              <t t-if="state.typeField == 'selection'">
+                <span t-esc="value"/>
+              </t>
+          </t>
+        <t t-else="">
+             <t t-if="state.typeField == 'float'">
+                 <input t-att-id="props.id" t-ref="numpadDecimal" autocomplete="off"
+                        t-att-placeholder="props.placeholder" t-att-type="props.inputType" inputmode="decimal"
+                        class="o_input" t-att-step="props.step"/>
+
+             </t>
+            <t t-if="state.typeField == 'integer'">
+                    <input t-ref="numpadNumeric" t-att-id="props.id"
+                           t-att-type="props.inputType"
+                           t-att-placeholder="props.placeholder" inputmode="numeric" class="o_input"
+                           t-att-step="props.step"
+                           autocomplete="off"/>
+             </t>
+            <t t-if="state.typeField == 'date'">
+                <DatePicker
+                        t-props="props.pickerOptions"
+                        date="value"
+                        inputId="props.id"
+                        placeholder="props.placeholder"
+                        onDateTimeChanged="(date) => this.onDateTimeChanged(date)"
+                        onInput.bind="onDatePickerInput"
+                        onUpdateInput.bind="onUpdateInput"
+                        revId="revId"
+                />
+             </t>
+            <t t-if="state.typeField == 'html'">
+                <t t-call="web.HtmlField"/>
+             </t>
+            <t t-if="state.typeField == 'char'">
+                 <input
+                         class="o_input"
+                         t-att-class="{'o_field_translate': false}"
+                         t-att-id="props.id"
+                         t-att-type="'text'"
+                         t-att-autocomplete="off"
+                         t-att-placeholder="props.placeholder"
+                         t-ref="input"/>
+             </t>
+            <t t-if="state.typeField == 'selection'">
+                <select class="o_input pe-3" t-on-change="onChangeSelect" t-att-id="props.id">
+                    <option
+                            t-att-selected="false === value"
+                             t-att-value="stringify(false)"
+                            t-esc="this.props.placeholder || ''"
+                    />
+                         <t t-foreach="options" t-as="option" t-key="option">
+                        <option
+                                t-att-selected="option === value"
+                                 t-att-value="stringify(option)"
+                                t-esc="option"
+                        />
+                    </t>
+                </select>
+             </t>
+         </t>
+    </t>
+</templates>

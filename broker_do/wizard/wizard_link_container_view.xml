@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="wizard_link_container_form" model="ir.ui.view">
+        <field name="name">wizard.link.container.form</field>
+        <field name="model">wizard.link.container</field>
+        <field name="arch" type="xml">
+            <form string="Vincular con póliza maestra">
+                <group>
+                        <group>
+                            <field name="insurer_id" readonly="1"/>
+                            <field name="container_id"
+                                   domain="[('insurer_id','=',insurer_id)]"/>
+                        </group>
+                        <group/>
+                </group>
+                <group>
+                    <field name="contract_ids" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="set_container_data" type="object" string="Establecer póliza maestra"
+                            class="oe_highlight"/>
+                    ó
+                    <button string="Cerrar" special="cancel" class="oe_link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
