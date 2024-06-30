@@ -404,7 +404,7 @@ class BrokerContract(models.Model):
                 "business_id": contract.business_id.id,
             }
             crm = crm_lead_obj.create(res)
-            for object_id in contract.object_ids:
+            for object_id in contract.contract_object_ids:
                 object_id.copy({
                     "lead_id": crm.id
                 })
