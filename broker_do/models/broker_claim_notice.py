@@ -122,7 +122,7 @@ class BrokerClaimNotice(models.Model):
     def _get_domain_object(self):
         res = []
         if self.contract_id:
-            objects = self.contract_id.contract_object_ids
+            objects = self.contract_id.object_ids
             res = [('id', 'in', objects.ids)]
         self.object_id = False
         self.deductible_id = False
@@ -293,7 +293,7 @@ class BrokerClaim(models.Model):
     def _get_domain_object(self):
         res = {"domain": {}}
         if self.contract_id:
-            object_ids = self.contract_id.contract_object_ids.ids
+            object_ids = self.contract_id.object_ids.ids
             res['domain']['object_id'] = [('id', 'in', object_ids)]
             actual_object_id = self.object_id.id
             self.object_id = False if actual_object_id not in object_ids else actual_object_id
