@@ -311,7 +311,7 @@ class BrokerContract(models.Model):
             movements = record.movement_ids.filtered(lambda mov: not mov.type_id.id == type_exclude.id)
             objects = movements.mapped("object_line_ids")
             objects_final = [obj.id for obj in set(objects - objects_exclude)]
-            record.object_ids = [Command.set(objects_final)]
+            record.contract_object_ids = [Command.set(objects_final)]
 
     def _get_branch_id_domain(self):
         res = [('id', '=', 0)]

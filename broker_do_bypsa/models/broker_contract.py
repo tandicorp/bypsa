@@ -31,4 +31,4 @@ class BrokerContract(models.Model):
     def _compute_items_num(self):
         """Numero de items dentro de la poliza"""
         for record in self:
-            record.num_insured_items = len(record.object_ids or [])
+            record.num_insured_items = len(record.contract_object_ids or [])
