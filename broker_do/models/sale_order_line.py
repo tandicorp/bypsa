@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, api, fields
-
+from odoo.tools import float_round
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
@@ -89,9 +89,10 @@ class SaleOrderLine(models.Model):
     @api.depends('sequence')
     def _compute_name(self):
         for record in self:
-            record.name = record.order_id.contract_id.client_id.name + '/ ' + ':'.join(
-                ['P.NETA', str(record.order_id.amount_fee) or '',
-                 str((record.order_id.commission_percentage or 0) * 100) + '%'])
+            if record.order_id.contract_id and record.order_id.contract_id.client_id:
+                record.name = record.order_id.contract_id.client_id.name + '/ ' + ':'.join(
+                    ['P.NETA', str(record.order_id.amount_fee) or '',
+                     str(float_round((record.order_id.commission_percentage or 0) * 100, 2)) + '%'])
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
     def _compute_amount(self):

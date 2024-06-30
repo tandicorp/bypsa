@@ -12,8 +12,9 @@
                             attrs="{'invisible': [('status','!=', 'draft')]}"
                             name="action_pay_fee">
                     </button>
-                    <button name="action_load_fee" string="Cargar cobros realizados en aseguradora" type="object" class="oe_highlight"
-                                attrs="{'invisible': [('status', '!=', 'draft')]}" data-hotkey="r"/>
+                    <button name="action_load_fee" string="Cargar cobros realizados en aseguradora" type="object"
+                            class="oe_highlight"
+                            attrs="{'invisible': [('status', '!=', 'draft')]}" data-hotkey="r"/>
                     <button class="oe_stat_button" type="object" string="Regresar a borrador"
                             attrs="{'invisible': [('status','=', 'draft')]}"
                             name="action_draft">
@@ -41,8 +42,22 @@
                             <field name="sale_fee_payment_ids" attrs="{'readonly': [('status','!=', 'draft')]}">
                                 <tree editable="bottom">
                                     <field name="fee_id" options="{'no_create': True}"
-                                           domain="[('status_fee','!=','paid'), ('contract_id.client_id','=',parent.partner_id)]"/>
+                                           domain="[('status_fee','!=','paid'), ('partner_contract_id','=',parent.partner_id)]"/>
                                     <field name="amount_paid"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Formas de pago">
+                            <field name="payment_method_ids" attrs="{'readonly': [('status','!=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="fee_id" invisible="1"/>
+                                    <field name="payment_method"/>
+                                    <field name="bank_id" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True, 'no_open': True}"
+                                           domain="[('country','=',%(base.ec)d)]" attrs="{'readonly': [('payment_method','=','cash')]}"/>
+                                    <field name="num_card" attrs="{'readonly': [('payment_method','in',('cash','transfer'))]}"/>
+                                    <field name="card_name" attrs="{'readonly': [('payment_method','!=','credit_card')]}"/>
+                                    <field name="transaction_num" attrs="{'readonly': [('payment_method','in',('cash','check'))]}"/>
+                                    <field name="payment_amount"/>
                                 </tree>
                             </field>
                         </page>

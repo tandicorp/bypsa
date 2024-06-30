@@ -6,12 +6,16 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="broker_do.sale_order_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='amount_tax_emission_rights']" position="attributes">
-                <attribute name="attrs">{'readonly': [('table_emission_rights', '!=', 'other')]}</attribute>
-                <attribute name="force_save">1</attribute>
-            </xpath>
             <xpath expr="//field[@name='amount_tax_emission_rights']" position="before">
-                <field name="table_emission_rights" attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
+                <field name="table_emission_rights" invisible="1"
+                       attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
+            </xpath>
+            <xpath expr="//page[1]" position="before">
+                <xpath expr="//page[@name='Objetos Asegurados']" position="move"/>
+            </xpath>
+            <xpath expr="//page[last()]" position="replace"/>
+            <xpath expr="//field[@name='sequence']" position="attributes">
+                <attribute name="string">Número de endoso</attribute>
             </xpath>
         </field>
     </record>

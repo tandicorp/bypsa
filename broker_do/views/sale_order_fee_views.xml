@@ -17,13 +17,15 @@
                         </h1>
                     </div>
                     <group>
-                        <group string="Montos de la cuota / comisión">
+                        <group string="Datos informativos">
                             <field name="contract_id" readonly="1"/>
                             <field name="sequence" readonly="1"/>
                             <field name="provisional_payment_date"/>
                             <field name="invoice_number"/>
-                            <field name="amount_insurance_due" attrs="{'readonly': [('status_fee','=', 'paid')]}"/>
-                            <field name="amount_insurance_due_negative" attrs="{'readonly': [('status_fee','=', 'paid')]}"/>
+                        </group>
+                        <group string="Montos de la cuota / comisión">
+                            <field name="amount_insurance_due" readonly="1"/>
+                            <field name="amount_insurance_due_negative" readonly="1"/>
                             <field name="balance_due" readonly="1" force_save="1"/>
                             <field name="balance_due_negative" readonly="1" force_save="1"/>
                         </group>
@@ -68,6 +70,11 @@
                         </page>
                     </notebook>
                 </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread" options="{'post_refresh': 'recipients'}"/>
+                </div>
             </form>
         </field>
     </record>
@@ -77,15 +84,18 @@
         <field name="model">broker.contract.fee</field>
         <field name="arch" type="xml">
             <tree string="Cuotas" default_order="provisional_payment_date, sequence">
-                <field name="sequence"/>
-                <field name="contract_id"/>
                 <field name="partner_contract_id"/>
-                <field name="provisional_payment_date"/>
+                <field name="branch_id"/>
+                <field name="contract_id"/>
+                <field name="annex_num"/>
                 <field name="invoice_number"/>
+                <field name="sequence"/>
+                <field name="provisional_payment_date"/>
                 <field name="amount_insurance_due"/>
-                <field name="amount_insurance_due_negative"/>
                 <field name="balance_due"/>
+                <field name="balance_due_negative"/>
                 <field name="status_fee"/>
+                <field name="status_due"/>
             </tree>
         </field>
     </record>
@@ -114,7 +124,7 @@
                 <field name="provisional_payment_date"/>
                 <filter string="Vencimiento semanal" name="current_week"
                         domain="[('provisional_payment_date', '&lt;=',  (context_today()+relativedelta(weeks=0, weekday=1)).strftime('%Y-%m-%d')),
-                        ('provisional_payment_date', '&gt;=',  context_today().strftime('%Y-%m-%d')), ('status_fee','!=','paid')]"/>
+                        ('provisional_payment_date', '&gt;=',  (context_today()+relativedelta(weeks=0, weekday=-1)).strftime('%Y-%m-%d')), ('status_fee','!=','paid')]"/>
                 <filter string="Vencidas hasta hoy" name="past_fee"
                         domain="[('provisional_payment_date', '&lt;=', context_today().strftime('%Y-%m-%d')), ('status_fee','!=','paid')]"/>
                 <group expand="0" name="group_by" string="Group By">

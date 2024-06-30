@@ -128,7 +128,7 @@ class CrmLead(models.Model):
         type_pol = self.env.ref("broker_do.policy_movement")
         contract_obj = self.env['broker.contract']
         date_start = fields.Date.today()
-        date_end = date_start + relativedelta(years=1, days=-1)
+        date_end = date_start + relativedelta(years=1)
         line_contract = fields.Command.create({
             "type_id": type_pol.id,
             "amount_fee": value,
@@ -147,8 +147,7 @@ class CrmLead(models.Model):
             "lead_id": self.id,
             "business_id": self.business_id.id,
             "version": 1,
-            "agreement_ids": [fields.Command.set([agree for agree in agreements])
-                              ],
+            "agreement_ids": [fields.Command.set([agree for agree in agreements])],
             "movement_ids": [line_contract]
         }
         if self.renewal_id:
@@ -160,7 +159,9 @@ class CrmLead(models.Model):
             self.renewal_id.in_renewal = False
         current_contract = contract_obj.create(contract_data)
         current_contract.onchange_insurance_company()
+        current_contract._compute_type_period()
         current_contract.movement_ids[0].onchange_amounts_for_commission()
+        current_contract._onchange_type_period()
         current_contract.movement_ids[0].action_calculate_fee()
         return current_contract
 

@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <form string="Esquema de facturación">
                 <div attrs="{'invisible':[('message','!=',False)]}">
+
                     <div class="alert alert-warning text-start" role="alert"
                          invisible="context.get('action_from') in ('payment_due', 'import_object')">
                         Nota: Al presionar el botón Importar y Crear, se crearán los contratos con el valor descrito en el

@@ -165,6 +165,10 @@ class AgreementsInsurer(models.Model):
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = dict(default or {})
+        amount_insured = False
+        if default.get("amount_insured"):
+            amount_insured = default.get("amount_insured")
+        default.pop("amount_insured",None)
         coverage_id = self.coverage_id.id if not default.get("coverage_id") else default.get("coverage_id")
         default.update({
             "default": False,
@@ -181,7 +185,7 @@ class AgreementsInsurer(models.Model):
         for line in agreement.agreements_line_ids.filtered(lambda line_new: line_new.display_type == 'attribute'):
             line_origin = lines_origin.filtered(lambda l_origin: l_origin.field == line.field)
             if line_origin:
-                line.amount_insured = line_origin[0].amount_insured
+                line.amount_insured = (amount_insured or line_origin[0].amount_insured) if not line.is_limit else 0.0
                 line.rate = line_origin[0].rate
                 line.value = line_origin[0].value
         return agreement
@@ -230,6 +234,10 @@ class AgreementsInsurerLine(models.Model):
     )
     is_deductible = fields.Boolean(
         related='coverage_line_id.is_deductible',
+        store=True
+    )
+    is_limit = fields.Boolean(
+        related='coverage_line_id.is_limit',
         store=True
     )
     value = fields.Text(

@@ -134,15 +134,13 @@ class BrokerPresettlementWizard(models.TransientModel):
         context = self.env.context.copy()
         movement_object = self.env['broker.movement.object']
         sale_order_obj = self.env['sale.order']
-        movement_info_object = self.env['broker.movement.object.value']
         if context.get('object_id'):
             object_id = movement_object.browse(context.get('object_id'))
         if context.get('movement_id'):
             movement_id = sale_order_obj.browse(context.get('movement_id'))
         sh = self.load_file()
-        lst_info = []
         headers = sh.row_values(0)
-        for r in range(2, sh.nrows):
+        for r in range(1, sh.nrows):
             rows = sh.row_values(r)
             res = {
                 "type": "normal",
@@ -163,12 +161,14 @@ class BrokerPresettlementWizard(models.TransientModel):
                     "lead_id": context.get('lead_id'),
                     "movement_branch_id": context.get('movement_branch_id')
                 })
-            object_move = movement_object.create(res)
+            lst_info = []
             for row in range(1, len(headers)):
-                res = {
-                    "movement_object_id": object_move.id,
-                    "movement_branch_object_id": int(headers[row]),
-                    "value_char": rows[row],
-                }
-                lst_info.append(res)
-        movement_info_object.create(lst_info)
+                lst_info.append(fields.Command.create( {
+                    "name": str(headers[row]),
+                    "value": str(rows[row]),
+                    "type": "char",
+                }))
+            res.update({
+                "data_line_ids": lst_info
+            })
+            object_move = movement_object.create(res)

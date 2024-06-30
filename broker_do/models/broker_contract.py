@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import ValidationError
 from itertools import groupby
@@ -9,7 +10,7 @@ _OPTIONS_PAYMENT = [
     ('monthly', 'Normal'),
     ('annully_comision', u'Plurianual'),
 ]
-
+_FIELDS_PERIOD_CHANGE = ["period_type", "date_start", "date_end"]
 
 class BrokerContract(models.Model):
     _name = 'broker.contract'
@@ -42,6 +43,13 @@ class BrokerContract(models.Model):
     date_end = fields.Date(
         'Fin de vigencia',
         tracking=True
+    )
+    day_number = fields.Integer(
+        'No. de días',
+        compute='_compute_day_number'
+    )
+    open_date_contract = fields.Boolean(
+        u'Póliza abierta',
     )
     commission_percentage = fields.Float(
         u'Porcentaje de comisión',
@@ -111,10 +119,10 @@ class BrokerContract(models.Model):
         "contract_id",
         string="Acuerdos aceptados"
     )
-    object_ids = fields.One2many(
+    contract_object_ids = fields.One2many(
         "broker.movement.object",
+        'contract_id',
         string="Objetos asegurados",
-        compute='_compute_object_ids'
     )
     user_id = fields.Many2one(
         string='Ejecutivo de ventas',
@@ -153,12 +161,14 @@ class BrokerContract(models.Model):
         string="No. Items asegurados",
         tracking=True
     )
-    period_type = fields.Selection([
-        ("1", "Mensual"),
-        ("3", "Trimestral"),
-        ("6", "Semestral"),
-        ("12", "Anual"),
-    ], string="Tipo de Periodo",
+    period_type = fields.Selection(
+        [
+            ("1", "Mensual"),
+            ("3", "Trimestral"),
+            ("6", "Semestral"),
+            ("12", "Anual"),
+        ],
+        string="Tipo de Periodo",
         required=True,
         default="1",
         tracking=True
@@ -166,11 +176,38 @@ class BrokerContract(models.Model):
     period_ids = fields.One2many(
         "broker.contract.period",
         "contract_id",
-        string="Periodos"
+        string="Periodos",
     )
 
-    @api.onchange("period_type", "date_start", "date_end")
-    def _onchange_type_period(self):
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Calculo de periodos al crear una poliza"""
+        res = super(BrokerContract, self).create(vals_list)
+        for record in res:
+            record._compute_type_period()
+        return res
+
+    def write(self, vals):
+        """Calculo de periodos al borrador"""
+        res = super(BrokerContract, self).write(vals)
+        if [x for x in _FIELDS_PERIOD_CHANGE if x in vals]:
+            for record in self:
+                record._compute_type_period()
+        return res
+
+    def unlink(self):
+        """Control para no eliminar polizas que no estan en borrador"""
+        not_draft_contract_ids = self.filtered(lambda record: record.state != 'draft')
+        if not_draft_contract_ids:
+            raise ValidationError(
+                u'No se puede eliminar contratos que no esten en estado borrador.\nLos contratos que no estan en '
+                u'estado "Borrador" son: \n-\t{}'.format(
+                    '\n\t- '.join(not_draft_contract_ids.mapped('name'))
+                )
+            )
+        return super(BrokerContract, self).unlink()
+
+    def _compute_type_period(self):
         def distance_month(date_start, date_end):
             """Permite obtener los meses de distancia entre dos fechas"""
             fecha_inicial = datetime.strptime(date_start, "%Y-%m-%d")
@@ -179,8 +216,9 @@ class BrokerContract(models.Model):
             return range_month
 
         for record in self:
+            record.period_ids.unlink()
+            lines = []
             if record.date_start and record.date_end:
-                lines = []
                 date_from = self.date_start
                 month = distance_month(str(record.date_start), str(record.date_end))
                 range_end = int(month / int(record.period_type) + 1)
@@ -194,7 +232,7 @@ class BrokerContract(models.Model):
                         "name": name,
                     }))
                     date_from = date_to + relativedelta(days=1)
-                record.period_ids = [Command.clear()] + lines
+            record.period_ids = lines
 
     def _compute_amount_accumulate_due(self):
         for record in self:
@@ -205,11 +243,24 @@ class BrokerContract(models.Model):
         for record in self:
             record.commission_ids = [Command.set(record.movement_ids.mapped('order_line').ids)]
 
+    @api.depends('date_start', 'date_end')
+    def _compute_day_number(self):
+        for record in self:
+            if record.date_end and record.date_start:
+                record.day_number = (record.date_end - record.date_start).days
+            else:
+                record.day_number = 0
+
     def _onchange_contract_fee_ids(self):
         for record in self:
+            if record.contract_fee_ids.filtered(lambda x: x.status_fee != 'no_payment'):
+                raise ValidationError(
+                    u"No se puede recomputar cuotas que ya han sido pagadas, por favor identifíquelas y cancele los "
+                    u"pagos y cruces antes de proceder con el recálculo de las cuotas de cartera."
+                )
             record = record._origin if record._origin else record
-            record.contract_fee_ids = [fields.Command.delete(fee_id.id) for fee_id in
-                                       record.contract_fee_ids.filtered(lambda x: x.status_fee == 'no_payment')]
+            contract_fee_ids_operations = [fields.Command.delete(fee_id.id) for fee_id in
+                                           record.contract_fee_ids.filtered(lambda x: x.status_fee == 'no_payment')]
             fee_line_ids = record.movement_ids.mapped('fee_line_ids').filtered(lambda x: x.status_fee == 'no_payment')
             list_create = []
             if fee_line_ids:
@@ -237,14 +288,15 @@ class BrokerContract(models.Model):
                         "fee_line_ids": [fields.Command.set([line.id for line in fee_lines])]
                     }
                     list_create.append(fields.Command.create(res))
-            record.contract_fee_ids = list_create
+            contract_fee_ids_operations.extend(list_create)
+            record.contract_fee_ids = contract_fee_ids_operations
             record.contract_fee_ids._compute_quotas_positive_negative()
 
     def _compute_stakeholder_ids(self):
         for record in self:
             record.stakeholder_ids = [Command.set(record.movement_ids.mapped('stakeholder_ids').ids)]
 
-    @api.depends("branch_id", "contract_num")
+    @api.depends("branch_id", "contract_num", "version")
     def _compute_name(self):
         for this in self:
             branch_code = this.branch_id and this.branch_id.code or ""
@@ -281,8 +333,6 @@ class BrokerContract(models.Model):
                'value': {'branch_id': False}}
         if self.insurer_id:
             commission_id = self.env['broker.commission.insurer'].search([
-                ('date_start', '<=', fields.Date.today()),
-                ('date_end', '>=', fields.Date.today()),
                 ('insurer_id', '=', self.insurer_id.id),
             ])
             if commission_id:
@@ -293,11 +343,15 @@ class BrokerContract(models.Model):
                     'percentage_value')
                 self.commission_percentage = perc_value and sum(perc_value) or self.commission_percentage or 0
             else:
-                raise ValidationError(
-                    "No Existe un contrato de agenciamiento asociado con la aseguradora {insurer}".format(
-                        insurer=self.insurer_id.name))
-
+                res['warning'] = {'title': 'Advertencia', 'message':
+                    "No existe un contrato de agenciamiento asociado con la aseguradora {insurer}".format(
+                        insurer=self.insurer_id.name)}
         return res
+
+    @api.onchange('open_date_contract')
+    def onchange_open_date_contract(self):
+        if self.open_date_contract:
+            self.period_type = '12'
 
     @api.onchange('date_start')
     def onchange_date_start(self):
@@ -350,6 +404,10 @@ class BrokerContract(models.Model):
                 "business_id": contract.business_id.id,
             }
             crm = crm_lead_obj.create(res)
+            for object_id in contract.object_ids:
+                object_id.copy({
+                    "lead_id": crm.id
+                })
             list_lead.append(crm.id)
             contract.in_renewal = True
         return {
@@ -366,7 +424,7 @@ class BrokerContract(models.Model):
         self.ensure_one()
         if not self.period_ids:
             raise ValidationError("Error deben existir periodos asociados al contrato")
-        period = self.period_ids.filtered(lambda period: period.date_from >= date <= period.date_to)
+        period = self.period_ids.filtered(lambda period: period.date_from <= date <= period.date_to).sorted('date_from')
         if not period:
             raise ValidationError("Periodo no encontrado para la fecha: {date}".format(date=str(date)))
         return period[0].id
@@ -399,8 +457,34 @@ class BrokerContract(models.Model):
         for record in self:
             record.state = 'draft'
 
+    def action_open_contract(self):
+        template = self.env.ref('broker_do.broker_contract_form')
+        return {
+            'type': 'ir.actions.act_window',
+            'res_id': self.id,
+            'res_model': 'broker.contract',
+            'view_mode': 'form',
+            'views': [(template.id, 'form')],
+        }
+
+    def link_to_container(self):
+        insurer_id = self.mapped('insurer_id')
+        if len(insurer_id) > 1:
+            raise ValidationError('No se pueden vincular a pólizas maestras, contratos con diferentes aseguradoras.')
+        return {
+            'name': 'Vincular con póliza maestra',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'wizard.link.container',
+            'context': {'default_insurer_id': insurer_id.id, 'default_contract_ids': self.ids},
+            'target': 'new',
+        }
+
+
 class BrokerContractFee(models.Model):
     _name = 'broker.contract.fee'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(
         string="Nombre de la cuota",
@@ -409,6 +493,7 @@ class BrokerContractFee(models.Model):
     )
     period_id = fields.Many2one(
         "broker.contract.period",
+        ondelete='restrict',
         string="Periodo"
     )
     period_date_from = fields.Date(
@@ -429,7 +514,35 @@ class BrokerContractFee(models.Model):
     )
     contract_id = fields.Many2one(
         'broker.contract',
+        ondelete='cascade',
         name="Contrato"
+    )
+    partner_contract_id = fields.Many2one(
+        'res.partner',
+        related='contract_id.client_id',
+        ondelete='restrict',
+        store=True
+    )
+    branch_id = fields.Many2one(
+        'broker.branch',
+        related='contract_id.branch_id',
+        ondelete='restrict',
+        store=True
+    )
+    annex_num = fields.Char(
+        related='contract_id.annex_num',
+        store=True
+    )
+    status_due = fields.Selection(
+        [
+            ('outstanding', 'Por vencer'),
+            ('overdue', 'Vencido'),
+            ('paid', 'Pagado'),
+        ],
+        string='Estado de cuota',
+        default='outstanding',
+        store=True,
+        compute='_compute_status_due'
     )
     amount_insurance_due = fields.Float(
         string='Cuota del seguro (+)'
@@ -443,8 +556,9 @@ class BrokerContractFee(models.Model):
             ('partial_payment', 'Parcialmente pagada'),
             ('paid', 'Pagada'),
         ],
-        u'Estado del pago de la cuota',
+        string=u'Estado del pago de la cuota',
         store=True,
+        default='no_payment',
         compute='_compute_status_payment'
     )
     balance_due = fields.Float(
@@ -460,6 +574,8 @@ class BrokerContractFee(models.Model):
     partner_contract_id = fields.Many2one(
         'res.partner',
         related='contract_id.client_id',
+        ondelete='restrict',
+        store=True
     )
     fee_line_ids = fields.One2many(
         'sale.order.fee',
@@ -472,14 +588,15 @@ class BrokerContractFee(models.Model):
         string='Lineas de pago',
     )
     provisional_payment_date = fields.Date(
-        string='Fecha prevista de pago'
+        string='Fecha de vencimiento'
     )
     payment_ids = fields.Many2many(
         'fee.payment',
         'payment_contract_fee_rel',
         'contract_fee_id',
         'payment_id',
-        string='Contratos',
+        string='Cuotas por movimientos',
+        ondelete='restrict',
     )
     positive_quota_cross_ids = fields.One2many(
         'broker.quota.cross.positive',
@@ -520,6 +637,15 @@ class BrokerContractFee(models.Model):
                 record.status_fee = status
             record.balance_due = record.amount_insurance_due - sum(
                 record.payment_fee_line_ids.filtered(lambda x: x.payment_id.status == 'paid').mapped('amount_paid'))
+
+    @api.depends('provisional_payment_date')
+    def _compute_status_due(self):
+        for record in self:
+            if not record.status_fee == 'paid':
+                if record.provisional_payment_date < fields.Date.context_today(record):
+                    record.status_due = 'overdue'
+            else:
+                record.status_due = 'paid'
 
     def action_pay_fee_line(self):
         return {
@@ -563,5 +689,6 @@ class BrokerContractPeriod(models.Model):
     )
     contract_id = fields.Many2one(
         "broker.contract",
+        ondelete='cascade',
         string="Contrato Asociado"
     )

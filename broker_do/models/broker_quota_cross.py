@@ -155,6 +155,7 @@ class BrokerQuotaCrossPositive(models.Model):
     )
     contract_fee_id = fields.Many2one(
         "broker.contract.fee",
+        ondelete='cascade',
         string="Cuota",
     )
     state = fields.Selection([
@@ -206,6 +207,7 @@ class BrokerQuotaCrossNegative(models.Model):
     )
     contract_fee_id = fields.Many2one(
         "broker.contract.fee",
+        ondelete='cascade',
         string="Cuota"
     )
     state = fields.Selection([

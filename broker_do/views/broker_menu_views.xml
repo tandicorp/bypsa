@@ -222,31 +222,25 @@
               name="Comisiones especiales"
               action="commission_special_wizard_action"
               sequence="10"/>
-    <!-- Pagos -->
-    <menuitem id="menu_action_account_payments_receivable_insurer"
-              parent="account.menu_finance_receivables"
-              action="fee_payment_action"
-              sequence="20"/>
-    <menuitem id="brokerdo_contract_fees"
-              parent="account.menu_finance_receivables"
-              name="Vencimientos"
-              action="sale_order_fee_action"
-              sequence="21"/>
-
 
     <!--    Broker Do - Cobros -->
-    <menuitem id="broker_do_receivable_menu_root" name="Cobros" sequence="15" parent="brokerdo_base_menu">
-        <menuitem id="menu_action_account_payments_receivable_insurer"
-                  name="Pago de cuotas de contrato"
-                  action="fee_payment_action"
-                  sequence="20"/>
-        <menuitem id="brokerdo_contract_fees"
-                  name="Vencimientos"
-                  action="sale_order_fee_action"
-                  sequence="21"/>
-        <menuitem name="Cruces"
-                  id="broker_quota_cross_menu"
-                  action="broker_quota_cross_act_window"
-        />
-    </menuitem>
+    <menuitem id="broker_do_receivable_menu_root"
+              name="Cobros"
+              parent="brokerdo_base_menu"
+              sequence="15"/>
+    <menuitem id="menu_action_account_payments_receivable_insurer"
+              parent="broker_do_receivable_menu_root"
+              name="Pago de cuotas de contrato"
+              action="fee_payment_action"
+              sequence="10"/>
+    <menuitem id="broker_quota_cross_menu"
+              name="Cruces"
+              parent="broker_do_receivable_menu_root"
+              action="broker_quota_cross_act_window"
+              sequence="20"/>
+    <menuitem id="brokerdo_contract_fees"
+              parent="broker_do_receivable_menu_root"
+              name="Vencimientos"
+              action="sale_order_fee_action"
+              sequence="30"/>
 </odoo>

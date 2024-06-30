@@ -50,6 +50,7 @@
                             <field name="tax_country_id" invisible="1"/>
                             <field name="company_id" invisible="1"/>
                             <field name="movement_branch_id" invisible="1"/>
+                            <field name="branch_id" invisible="1"/>
                         </group>
                         <group string="Montos de la movimiento">
                             <field name="amount_fee"
@@ -70,44 +71,41 @@
                                    attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
                             <field name="commission_percentage" widget="percentage"
                                    attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
-                            <field name="amount_total_commission"
+                            <field name="amount_total_commission" readonly="1" force_save="1"
                                    attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
                         </group>
                         <group string="Fecha de vigencia">
                             <field name="date_start"
                                    attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
                             <field name="date_end"
-                                   attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
+                                   attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))], 'invisible': [('type_id','=',%(broker_do.transportation_application_movement)d)]}"/>
+                            <field name="day_number" force_save="1"
+                                   attrs="{'invisible': [('day_number','=',False)], 'readonly': True}"/>
+                            <separator string="Esquema de facturación"/>
+                            <field name="invoice_number"/>
+                            <field name="number_period" string="Número de periodos"
+                                   attrs="{'invisible': ['|',('payment_period','=','annually'),
+                                   ('type_id','in',(%(broker_do.transportation_application_movement)d,%(broker_do.cancel_movement)d,
+                                   %(broker_do.exclusion_movement)d))],
+                                   'readonly': [('status_movement','in',('approved','rejected'))], 'required': [('payment_period','!=','annually')]}"/>
+                            <field name="payment_period" widget="radio" options="{'horizontal': true}"
+                                   required="1"
+                                   attrs="{'invisible': [('status_movement','in',('approved','rejected'))]}"/>
+                            <field name="taxes_calculation"
+                                   attrs="{'invisible': [('status_movement','in',('approved','rejected'))]}"/>
                             <field name="date_invoice"
                                    attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
                             <field name="date_next_payment"
                                    attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}"/>
-                        </group>
-                    </group>
-                    <group string="Esquema de facturación">
-                        <div>
-                            <field name="payment_period" nolabel="1" widget="radio" options="{'horizontal': true}"
-                                   required="1"
-                                   attrs="{'invisible': [('status_movement','in',('approved','rejected'))]}"/>
-                        </div>
-                        <div>
-                            <div class="alert alert-warning" role="alert"
-                                 attrs="{'invisible': [('warning_flag', '=', False)]}">
-                                Se ha cambiado las cuotas del movimiento, genere las comisiones presionando el
-                                botón "Generar comisiones".
-                            </div>
-                        </div>
-                        <group>
-                            <field name="taxes_calculation" attrs="{'invisible': [('payment_period','!=','annully_comision')]}"/>
-                            <field name="depreciacion_percentage" widget="percentage"
-                                   attrs="{'invisible': [('payment_period','!=','annully_comision')]}"/>
-                            <field name="number_period" string="Número de periodos"
-                                   attrs="{'invisible': [('payment_period','=','annually')], 'readonly': [('status_movement','in',('approved','rejected'))], 'required': [('payment_period','!=','annually')]}"/>
-                            <field name="depreciacion_percentage" attrs="{'invisible': [('payment_period','!=','annually')]}"/>
-                            <field name="invoice_number"/>
                             <field name="warning_flag" invisible="1"/>
+
                         </group>
                     </group>
+                    <div class="alert alert-warning" style="width: 100%" role="alert"
+                         attrs="{'invisible': [('warning_flag', '=', False)]}">
+                        Se ha cambiado las cuotas del movimiento, genere las comisiones presionando el
+                        botón "Generar comisiones".
+                    </div>
                     <button type="object" name="action_calculate_fee" string="Generar cuotas de cartera"
                             class="oe_highlight oe_stat_button size_buttons"/>
                     <button type="object" name="action_generate_commission" string="Generar comisiones"
@@ -115,29 +113,33 @@
                     <button type="object" name="action_set_invoice_number" string="Establecer num. factura"
                             class="oe_highlight oe_stat_button size_buttons" icon="fa-file-text"
                             confirm="Esta acción establece el número de factura en todas las cuotas, ¿está seguro/a que desea continuar?"/>
+                    <button type="object" name="action_recalculate_fee" string="Recalcular cuotas de cartera"
+                            class="oe_highlight oe_stat_button size_buttons" icon="fa-file-text"/>
                     <notebook>
                         <page string="Cuotas">
-                            <field name="fee_line_ids" force_save="1">
-                                <tree string="Cuotas">
-                                    <field name="sequence"/>
-                                    <field name="period_id"/>
-                                    <field name="period_date_from"/>
-                                    <field name="period_date_to"/>
+                            <field name="fee_line_ids" force_save="1"
+                                   attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}">
+                                <tree string="Cuotas" editable="bottom">
+                                    <field name="sequence" readonly="1"/>
+                                    <field name="period_id" optional="hide"/>
+                                    <field name="period_date_from" optional="hide"/>
+                                    <field name="period_date_to" optional="hide"/>
                                     <field name="partner_contract_id"/>
                                     <field name="provisional_payment_date"/>
                                     <field name="invoice_number"/>
-                                    <field name="amount_insurance_fee"/>
+                                    <field name="amount_insurance_fee" optional="hide"/>
                                     <field name="amount_insurance_due"/>
-                                    <field name="status_fee"/>
+                                    <field name="status_fee" readonly="1"/>
                                 </tree>
                             </field>
                         </page>
                         <page string="Comisiones">
-                            <field name="order_line">
+                            <field name="order_line"
+                                   attrs="{'readonly': [('status_movement','not in',('draft','insurance_release'))]}">
                                 <tree string="Comisiones">
                                     <field name="sequence"/>
                                     <field name="fee_id" invisible="1"/>
-                                    <field name="period_id"/>
+                                    <field name="period_id" optional="hide"/>
                                     <field
                                             name="product_id"
                                             attrs="{
@@ -298,10 +300,18 @@
                                 <button name="export_object_data" type="object" string="Descargar Formato"
                                         class="oe_highlight float-end" icon="fa-download"/>
                             </div>
-                            <field name="object_line_ids">
+                            <field name="object_line_ids" context="{
+                            'default_movement_branch_id': movement_branch_id,
+                             'default_branch_id': branch_id,
+                             }">
                                 <tree>
+                                    <field name="branch_id" invisible="1"/>
+                                    <field name="movement_branch_id" invisible="1"/>
+                                    <field name="movement_id" invisible="1"/>
                                     <field name="name"/>
                                     <field name="type"/>
+                                    <field name="amount_insured"/>
+                                    <field name="agreement_id"/>
                                 </tree>
                             </field>
                         </page>
@@ -420,6 +430,7 @@
                             <field name="name"/>
                             <field name="code"/>
                             <field name="operation"/>
+                            <field name="view_id"/>
                         </group>
                         <group/>
                     </group>
@@ -451,7 +462,6 @@
         </field>
     </record>
 
-
     <!--    Objeto Asegurado-->
     <record id="broker_movement_object_form" model="ir.ui.view">
         <field name="name">broker.movement.object.form</field>
@@ -468,17 +478,17 @@
                     <div class="oe_title" name="name">
                         <label for="name" string="Nombre"/>
                         <h1>
-                            <field name="name" string="Nombre" required="1" placeholder="Ingrese el nombre"/>
+                            <field name="name" string="Nombre" required="1" placeholder="Ingrese el nombre"
+                                   attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                         </h1>
                     </div>
                     <group name="object_group">
                         <group>
                             <field name="type_id" invisible="1"/>
+                            <field name="movement_id" invisible="1"/>
                             <field name="contract_id" invisible="1"/>
-                            <field name="object_id" domain="[('contract_id','=',contract_id)]"
-                                   attrs="{'invisible': [('type_id','!=',%(broker_do.exclusion_movement)d)]}"/>
                             <field name="type"
-                                   attrs="{'invisible': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
+                                   attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                         </group>
                         <group>
                             <field name="movement_branch_id" invisible="1"/>
@@ -487,53 +497,76 @@
                     </group>
                     <group>
                         <group>
-                            <field name="amount_insured" required="1"/>
+                            <field name="amount_insured" required="1"
+                                   attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                         </group>
                         <group/>
                     </group>
                     <group>
                         <group>
-                            <field name="agreement_id" attrs="{'invisible': [('agreement_id','=',False)]}"/>
+                            <field name="agreement_id"
+                                   attrs="{'invisible': [('agreement_id','=',False)], 'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                         </group>
                         <group/>
                     </group>
                     <div class="oe_inline" name="buttons_export">
                         <button name="import_object_data" type="object" string="Importar Objetos"
                                 class="oe_highlight float-end" icon="fa-upload"
-                                attrs="{'invisible': [('type','!=','blanket')]}"/>
+                                attrs="{'invisible': ['|', ('type','!=','blanket'), ('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                         <button name="export_object_data" type="object" string="Descargar Formato"
                                 class="oe_highlight float-end" icon="fa-download"
-                                attrs="{'invisible': [('type','!=','blanket')]}"/>
+                                attrs="{'invisible': ['|', ('type','!=','blanket'), ('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                     </div>
-                    <notebook attrs="{'invisible': [('type_id','=',%(broker_do.exclusion_movement)d)]}">
-                        <page string="Información Objeto Asegurado" attrs="{'invisible': [('type','=','blanket')]}"
-                              name="page_information">
-                            <group name="object_info">
-                            </group>
+                    <notebook>
+                        <page string="Información Objeto Asegurado" attrs="{'invisible': [('type','=','blanket')]}">
+                            <button name="config_field" type="object" string="Añadir Nuevo" class="btn-primary"
+                                    attrs="{'invisible': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
+                            <field name="data_line_ids"
+                                   attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}">
+                                <tree editable="bottom" multi_edit="0" sample="1" create="0">
+                                    <field name="name"/>
+                                    <field name="value" widget="widget_type"/>
+                                    <field name="value_change"
+                                           attrs="{'invisible': [('parent.type_id','in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
+                                    <field name="final_value" readonly="1"
+                                           attrs="{'invisible': [('parent.type_id','in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
+                                    <field name="type" optional="hide"/>
+                                    <field name="value_field" optional="hide"/>
+                                    <field name="add_value" optional="hide" widget="boolean_toggle"/>
+                                    <button name="config_field" type="object" icon="fa-edit" title="Editar"
+                                            attrs="{'invisible': [('parent.type_id','=',%(broker_do.exclusion_movement)d)]}"
+                                            class="float-end btn-secondary"/>
+                                </tree>
+                            </field>
                         </page>
-                        <page name="page_blanket" string="Información Blanket"
-                              attrs="{'invisible': [('type','!=','blanket')]}">
+                        <page name="page_blanket" string="Información Blanket" attrs="{'invisible': [('type','!=','blanket')]}">
                             <group>
                                 <group>
-                                    <field name="amount" attrs="{'required': [('type','=','blanket')]}"/>
+                                    <field name="amount"
+                                           attrs="{'required': [('type','=','blanket')], 'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                                 </group>
                                 <group>
-                                    <field name="comment"/>
+                                    <field name="comment"
+                                           attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                                 </group>
                             </group>
                             <group name="group_info">
                             </group>
                         </page>
-                        <page string="Información adicional" name="page_info_additional">
-                            <field name="info_line_ids">
+                        <page string="Información adicional" name="page_info_additional"
+                              attrs="{'invisible': [('type','=','blanket')]}">
+                            <field name="info_line_ids"
+                                   attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}">
                                 <tree editable="bottom">
                                     <field name="name"/>
                                     <field name="comment"/>
                                 </tree>
                             </field>
                         </page>
-                        <page string="Acuerdos" name="page_agreements">
-                            <field name="agreements_line_ids" readonly="1" style="pointer-events: none;">
+                        <page string="Acuerdos" name="page_agreements"
+                              attrs="{'invisible': [('type','=','blanket')]}">
+                            <field name="agreements_line_ids" readonly="1" style="pointer-events: none;"
+                                   attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}">
                                 <tree>
                                     <field name="agreement_id" options='{"no_open": True}'/>
                                     <field name="state" options='{"no_open": True}'/>
@@ -549,8 +582,10 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Deducibles" name="page_deductible">
-                            <field name="deductible_ids">
+                        <page string="Deducibles" name="page_deductible"
+                              attrs="{'invisible': [('type','=','blanket')]}">
+                            <field name="deductible_ids"
+                                   attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}">
                                 <tree editable="bottom">
                                     <field name="template_id"/>
                                     <field name="name"/>
@@ -564,6 +599,46 @@
             </form>
         </field>
     </record>
+
+    <record id="broker_movement_object_data_form" model="ir.ui.view">
+        <field name="name">broker.movement.object.data.form</field>
+        <field name="model">broker.movement.object.data</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="oe_title">
+                    <h1>
+                        <h1>
+                            <label for="name"/>
+                        </h1>
+                        <field name="name" force_save="1"/>
+                    </h1>
+                </div>
+                <group>
+                    <group>
+                        <field name="value" widget="widget_type"/>
+                    </group>
+                    <group>
+                        <field name="type"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                        <field name="add_value" widget="boolean_toggle"/>
+                    </group>
+                    <group>
+                        <field name="object_id" invisible="1"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                        <field name="value_field"
+                               attrs="{'invisible':[('type','!=','selection')]}"/>
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+
     <record id="broker_movement_object_tree" model="ir.ui.view">
         <field name="name">broker.movement.object.tree</field>
         <field name="model">broker.movement.object</field>

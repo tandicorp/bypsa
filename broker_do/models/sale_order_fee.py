@@ -33,14 +33,15 @@ class SaleOrderFee(models.Model):
     partner_contract_id = fields.Many2one(
         'res.partner',
         string=u'Cliente',
-        compute='_compute_contract_id'
+        compute='_compute_contract_id',
     )
     movement_id = fields.Many2one(
         'sale.order',
-        string='Movimento de contrato'
+        string='Movimento de contrato',
+        ondelete='cascade',
     )
     provisional_payment_date = fields.Date(
-        string='Fecha prevista de pago'
+        string='Fecha de vencimiento'
     )
     invoice_number = fields.Char(
         string=u'Número de factura'
@@ -156,6 +157,11 @@ class FeePayment(models.Model):
         'contract_fee_id',
         string='Cuotas de contratos',
     )
+    payment_method_ids = fields.One2many(
+        'fee.payment.method',
+        'fee_id',
+        string='Forma de pago',
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -229,6 +235,7 @@ class SaleOrderFeePayment(models.Model):
     fee_id = fields.Many2one(
         'broker.contract.fee',
         required=True,
+        ondelete='cascade',
         string='Cuota del contrato'
     )
     amount_paid = fields.Float(
@@ -254,3 +261,37 @@ class SaleOrderFeePayment(models.Model):
                                                      float_round(fee_id.balance_due, 2),
                                                      abs(balance_after_payment),
                                                      '\t\n-\t'.join(payment_done)))
+
+
+class FeePaymentMethod(models.Model):
+    _name = 'fee.payment.method'
+
+    fee_id = fields.Many2one(
+        'fee.payment',
+        string="Pago"
+    )
+    payment_method = fields.Selection(
+        [
+            ('cash', 'Efectivo'),
+            ('transfer', 'Transferencia'),
+            ('credit_card', u'Tarjeta de crédito'),
+            ('check', 'Cheque'),
+        ],
+        string=u"Método de pago"
+    )
+    bank_id = fields.Many2one(
+        'res.bank',
+        string="Banco"
+    )
+    num_card = fields.Char(
+        string=u"No. de tarjeta / No. cheque"
+    )
+    card_name = fields.Char(
+        string="Nombre de tarjeta"
+    )
+    transaction_num = fields.Char(
+        string=u"No. de transacción / No. de Lote"
+    )
+    payment_amount = fields.Float(
+        string="Monto de pago"
+    )
