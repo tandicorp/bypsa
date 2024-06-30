@@ -62,7 +62,6 @@
         'wizard/wizard_presettlement_view.xml',
         'wizard/wizard_notice_message_view.xml',
         'wizard/request_quotation_wizard.xml',
-        'wizard/wizard_link_container_view.xml',
         'wizard/wizard_contract_object_view.xml',
         'reports/report_crm_lead_comparison.xml',
         'views/account_analytic_distribution_model_views.xml',
@@ -70,6 +69,7 @@
         'views/broker_contract_deductible_template_view.xml',
         'reports/reports.xml',
         'views/broker_menu_views.xml',
+        'wizard/wizard_link_container_view.xml',
     ],
     'assets': {
         'web.assets_backend': [
