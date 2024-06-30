@@ -42,8 +42,12 @@ class AgreementInsurerWizard(models.TransientModel):
                 agreements = agreements_obj.search(domain)
                 list_agreement = []
                 for agreement in agreements:
+                    check = True
+                    if this.object_id.agreements_line_ids:
+                        check = False
                     list_agreement.append(fields.Command.create({
-                        "agreement_id": agreement.id
+                        "agreement_id": agreement.id,
+                        "check": check
                     }))
                 this.agreements_line_ids = list_agreement
 
@@ -57,12 +61,14 @@ class AgreementInsurerWizard(models.TransientModel):
                     if agree_id.agreement_id.id in agreements_uncheck.ids:
                         agree_id.unlink()
                         agree_id.agreement_id.unlink()
+
             if agreements:
                 lines = []
                 lead_agreement = this.object_id.agreements_line_ids.mapped("agreement_id.base_product_id")
                 agreements = agreements.filtered(lambda ag: ag.agreement_id.id not in lead_agreement.ids)
                 for agree in agreements:
-                    agree_cp = agree.agreement_id.copy({"coverage_id": this.template_id.id})
+                    agree_cp = agree.agreement_id.copy(
+                        {"coverage_id": this.template_id.id, "amount_insured": this.object_id.amount_insured})
                     lines.append(fields.Command.create({
                         "agreement_id": agree_cp.id
                     }))
@@ -76,7 +82,7 @@ class AgreementInsurerWizard(models.TransientModel):
                 'tag': 'broker_do.agreement_compare_action_js',
                 'params': params,
                 'identification': this.object_id.id,
-                'lead_id': this.object_id.lead_id.id,
+                'lead_id': this.object_id.lead_id.id or False,
                 'template_id': this.template_id.id,
             }
 

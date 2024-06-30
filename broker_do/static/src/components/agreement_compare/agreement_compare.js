@@ -61,6 +61,11 @@ export class AgreementCompare extends Component {
         const result = await this.orm.call("broker.movement.object", "accept_agreement_object", [this.identification], {agreement});
         this.messageInfo = "En unos segundo se mostrara el Contrato"
         this.showToast();
+        console.log(result);
+        if (!result){
+             console.log("Entro");
+            this.lead_id = false;
+        }
         return this.OnClickLead()
     }
 

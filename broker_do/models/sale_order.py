@@ -2,7 +2,7 @@
 from odoo import models, api, fields, Command
 from odoo.exceptions import UserError
 from odoo.addons.broker_do.models.broker_contract import _OPTIONS_PAYMENT
-from odoo.tools import float_round
+from odoo.tools import float_round, float_compare
 from odoo.exceptions import ValidationError
 
 from datetime import datetime
@@ -10,8 +10,8 @@ from dateutil.relativedelta import relativedelta
 import calendar
 
 _module = 'broker_do'
-_branches_medical_assistance = ['broker_branch_medical_assistance', 'broker_branch_accident']
-_branches_no_taxes = ['broker_branch_individual', 'broker_branch_collective'] + _branches_medical_assistance
+_branches_medical_assistance = ['broker_branch_medical_assistance']
+_branches_no_taxes = ['broker_branch_individual', 'broker_branch_collective', 'broker_branch_accident'] + _branches_medical_assistance
 
 
 class SaleOrder(models.Model):
@@ -68,13 +68,13 @@ class SaleOrder(models.Model):
     amount_fee_subtotal = fields.Float(
         'Subtotal cuota',
         store=True,
-        compute='_compute_amount_fee_subtotal',
+        compute='_compute_amount_taxes_insurance',
         inverse="_set_amounts"
     )
     amount_tax_iva = fields.Float(
         'IVA',
         store=True,
-        compute='_compute_amount_fee_subtotal',
+        compute='_compute_amount_taxes_insurance',
         inverse="_set_amounts",
         tracking=True
     )
@@ -84,6 +84,9 @@ class SaleOrder(models.Model):
     )
     amount_due = fields.Float(
         string='Prima total',
+        store=True,
+        compute='_compute_amounts_for_commission',
+        inverse="_set_amounts",
         tracking=True
     )
     commission_percentage = fields.Float(
@@ -103,6 +106,10 @@ class SaleOrder(models.Model):
     date_end = fields.Date(
         string='Fecha de fin',
         tracking=True
+    )
+    day_number = fields.Integer(
+        'No. de días',
+        compute='_compute_day_number'
     )
     date_invoice = fields.Date(
         string='Fecha de primera cuota',
@@ -137,7 +144,7 @@ class SaleOrder(models.Model):
             ('fee_distributed', 'Distribuida en las cuotas'),
         ],
         string=u"Distribución impuestos",
-        default="fee_distributed",
+        default="first_fee",
         tracking=True
     )
     warning_flag = fields.Boolean(
@@ -146,10 +153,6 @@ class SaleOrder(models.Model):
     contract_id = fields.Many2one(
         "broker.contract",
         string="Contrato",
-        tracking=True
-    )
-    depreciacion_percentage = fields.Float(
-        "Porcentaje de depreciación",
         tracking=True
     )
     contract_num = fields.Char(
@@ -198,12 +201,23 @@ class SaleOrder(models.Model):
         "order_id",
         string="Documentos"
     )
+    branch_id = fields.Many2one(
+        related="contract_id.branch_id",
+        store=True,
+        string="Ramo"
+    )
 
-    # deductible_ids = fields.One2many(
-    #     "broker.object.deductible",
-    #     string="Deducible",
-    #     readonly=False0,00
-    # )
+    @api.model_create_multi
+    def create(self, vals_list):
+        contract_obj = self.env['broker.contract']
+        for element in vals_list:
+            if 'contract_id' in element and element['contract_id']:
+                move_draft_ids = contract_obj.browse(element['contract_id']).movement_ids.filtered(
+                    lambda x: x.status_movement in ('draft', 'insurance_release'))
+                if move_draft_ids:
+                    raise ValidationError(u'No se puede crear nuevos movimientos si existen, movimientos anteriores en borrador.'
+                                          u'\n¡Por favor confirme o elimine los movimientos previos antes de continuar!')
+        return super(SaleOrder, self).create(vals_list)
 
     @api.depends()
     def _set_contract_num(self):
@@ -239,21 +253,20 @@ class SaleOrder(models.Model):
             if self.env.user.company_id.tax_insurance_peasant_id:
                 amount_taxes = self.env.user.company_id.tax_insurance_peasant_id.compute_all(record.amount_fee)
                 record.amount_tax_insurance_peasant = amount_taxes['taxes'][0]['amount']
-            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch, raise_if_not_found=False) for branch in
-                                                  _branches_medical_assistance]:
+            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch, raise_if_not_found=False) for
+                                                  branch in _branches_medical_assistance]:
                 if self.env.user.company_id.tax_super_cias_id:
                     amount_taxes = self.env.user.company_id.tax_super_cias_id.compute_all(record.amount_fee)
                     record.amount_tax_super_cias = amount_taxes['taxes'][0]['amount']
-
-    @api.depends("amount_fee", "amount_tax_insurance_peasant", "amount_tax_super_cias", "amount_tax_emission_rights")
-    def _compute_amount_fee_subtotal(self):
-        for record in self:
             record.amount_fee_subtotal = sum([record.amount_fee, record.amount_tax_insurance_peasant,
                                               record.amount_tax_super_cias, record.amount_tax_emission_rights])
-            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch, raise_if_not_found=False) for branch in
-                                                  _branches_no_taxes]:
+            if self.contract_id.branch_id not in [self.env.ref(_module + '.' + branch, raise_if_not_found=False) for
+                                                  branch in _branches_no_taxes]:
                 amount_taxes = self.env.user.company_id.account_sale_tax_id.compute_all(record.amount_fee_subtotal)
                 record.amount_tax_iva = amount_taxes['taxes'][0]['amount']
+            record.amount_due = sum([self.amount_fee, self.amount_tax_insurance_peasant,
+                                     self.amount_tax_super_cias, self.amount_tax_iva,
+                                     self.amount_tax_emission_rights, self.amount_other_charges])
 
     def _set_amounts(self):
         for record in self:
@@ -270,12 +283,27 @@ class SaleOrder(models.Model):
             this.name = " - ".join([insurer_shortname, this.contract_id.name or '']) + " | " + " - ".join(
                 [type_code, str(this.sequence)])
 
-    @api.onchange('amount_fee', 'amount_tax_insurance_peasant', 'amount_tax_super_cias', 'amount_tax_iva',
-                  'amount_tax_emission_rights', 'amount_other_charges', 'commission_percentage', )
-    def onchange_amounts_for_commission(self):
+    @api.depends('date_start', 'date_end')
+    def _compute_day_number(self):
+        for record in self:
+            if record.date_end and record.date_start:
+                record.day_number = (record.date_end - record.date_start).days
+            else:
+                record.day_number = 0
+
+    @api.depends('amount_other_charges', 'amount_tax_iva', "amount_tax_insurance_peasant", "amount_tax_super_cias",
+                 "amount_tax_emission_rights")
+    def _compute_amounts_for_commission(self):
         self.amount_due = sum([self.amount_fee, self.amount_tax_insurance_peasant,
                                self.amount_tax_super_cias, self.amount_tax_iva,
                                self.amount_tax_emission_rights, self.amount_other_charges])
+
+    @api.onchange('type_id')
+    def onchange_amounts_for_commission(self):
+        if self.type_id in (self.env.ref('broker_do.transportation_application_movement'),
+                            self.env.ref('broker_do.cancel_movement'),
+                            self.env.ref('broker_do.exclusion_movement'),):
+            self.number_period = 1
 
     @api.depends("order_line")
     def get_amount_total_commission(self):
@@ -330,7 +358,7 @@ class SaleOrder(models.Model):
                             'amount_insurance_fee': float_round(mount_fee, decimal_places, rounding_method='HALF-DOWN'),
                         }
                     )
-                return fee_vals
+            return fee_vals
 
         def adjust_period_amounts(residual_amount_due, residual_amount_fee, fee_line_ids):
             if len(fee_line_ids) <= 1:
@@ -351,7 +379,7 @@ class SaleOrder(models.Model):
         date_start = self.date_next_payment or self.date_start or datetime.utcnow().date()
         num_period, period, date_begin = self.number_period, 'monthly', date_start
         first_date = self.date_invoice
-        if self.amount_due and self.status_movement == 'draft':
+        if self.amount_due and self.status_movement in ('draft', 'insurance_release'):
             if self.payment_period == 'annually':
                 num_period, period = 1, 'yearly'
             elif self.payment_period == 'annully_comision':
@@ -376,14 +404,19 @@ class SaleOrder(models.Model):
             self.contract_id._onchange_contract_fee_ids()
             self.warning_flag = True
         else:
-            raise ValidationError(u'El movimiento no se encuentra en estado "Borrador", por esto no se puede '
-                                  u'recalcular las cuotas.')
+            if not self.amount_due:
+                message = "no tiene valor de prima neta"
+            else:
+                message = 'no se encuentra en estado "Borrador" o "Remitido aseguradora"'
+            raise ValidationError(u'El movimiento {}, por esto no se puede recalcular las cuotas.'.format(message))
 
     def action_recalculate_fee(self):
         self.contract_id._onchange_contract_fee_ids()
 
     def action_open_movement(self):
         template = self.env.ref('broker_do.sale_order_form')
+        if self.type_id.view_id:
+            template = self.type_id.view_id
         return {
             'type': 'ir.actions.act_window',
             'res_id': self.id,
@@ -392,19 +425,26 @@ class SaleOrder(models.Model):
             'views': [(template.id, 'form')],
         }
 
+    def action_select_object(self):
+        template = self.env.ref('broker_do.wizard_contract_object_form')
+        return {
+            'name': 'Escoja un item para modificar',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'context': {'default_contract_id': self.contract_id.id, 'default_movement_id': self.id,
+                        'default_movement_contract_object_ids': self.object_line_ids.mapped('contract_object_id').ids},
+            'res_model': 'wizard.contract.object',
+            'view_mode': 'form',
+            'views': [(template.id, 'form')],
+            'view_id': template.id,
+            'target': 'new',
+        }
+
     def action_insurance_release(self):
         self.ensure_one()
-        if self.amount_fee != abs(sum(self.fee_line_ids.mapped('amount_insurance_fee'))):
-            raise ValidationError(u'Las cuotas del movimiento no suman lo mismo que el total de la prima.')
+        self.compare_fee_sum_amount()
         template_movement_branch = self.env['broker.movement.branch'].sudo().search(
             [('branch_id', '=', self.contract_id.branch_id.id), ('type_id', '=', self.type_id.id)])
-        # if not template_movement_branch or not template_movement_branch.mail_template_id:
-        #     msg = (u"La configuración de plantilla de movimiento está incompleta, se requiere configurar correctamente "
-        #            u"la plantilla para el ramo {branch} y el movimiento {type} en el menú "
-        #            u"BrokerDo/Configuración/Plantilla de movimiento").format(
-        #         branch=self.contract_id.branch_id.name, type=self.type_id.name
-        #     )
-        #     raise ValidationError(msg)
         template = template_movement_branch.mail_template_id or False
         compose_form = self.env.ref('mail.email_compose_message_wizard_form', False)
         ctx = dict(
@@ -431,7 +471,10 @@ class SaleOrder(models.Model):
     def action_generate_commission(self, **kwargs):
         if self.order_line._check_line_unlink():
             raise UserError(
-                "El contrato se encuentra vigente y no se puede realizar el recalculo de las comisiones.")
+                u"El contrato se encuentra vigente y no se puede realizar el recálculo de las comisiones.")
+        if not self.fee_line_ids:
+            raise UserError(
+                u"El movimiento no posee cuotas de contrato y no se puede realizar el cálculo de las comisiones.")
         distribution, period_num = 'first', 1
         decimal_places = self.env.company.currency_id.decimal_places
         if self.amount_due and self.payment_period == 'annully_comision':
@@ -470,9 +513,12 @@ class SaleOrder(models.Model):
         for fee_id in self.fee_line_ids:
             fee_id.invoice_number = self.invoice_number
 
-    def action_release_move(self):
-        if self.amount_fee != abs(sum(self.fee_line_ids.mapped('amount_insurance_fee'))):
+    def compare_fee_sum_amount(self):
+        if float_compare(self.amount_fee, abs(sum(self.fee_line_ids.mapped('amount_insurance_fee'))), 2) != 0:
             raise ValidationError(u'Las cuotas del movimiento no suman lo mismo que el total de la prima.')
+
+    def action_release_move(self):
+        self.compare_fee_sum_amount()
         self.status_movement = 'insurance_release'
 
     def action_back_release_move(self):
@@ -481,6 +527,38 @@ class SaleOrder(models.Model):
     def action_approve_move(self):
         if self.type_id == self.env.ref('broker_do.policy_movement'):
             self.contract_id.state = 'valid'
+        for object_id in self.object_line_ids:
+            # Cuando no tengo items se crea una copia del objeto en el contrato
+            if not object_id.contract_object_id:
+                contract_object_id = object_id.copy({
+                    'contract_id': self.contract_id.id,
+                    'movement_id': False,
+                })
+                object_id.contract_object_id = contract_object_id.id
+            # Cuando es exclusion se desactiva el objeto en el contrato del que se saco la copia
+            elif self.type_id == self.env.ref('broker_do.exclusion_movement'):
+                object_id.contract_object_id.active = False
+            # Actualizacion del objeto del contrato por sus cambios en el movimiento
+            else:
+                for object_id in self.object_line_ids:
+                    if not object_id.contract_object_id:
+                        contract_object_id = object_id.copy({
+                            'contract_id': self.contract_id.id,
+                            'movement_id': False,
+                        })
+                        object_id.contract_object_id = contract_object_id.id
+                    else:
+                        contract_object_id = object_id.contract_object_id
+                        contract_object_id.data_line_ids.unlink()
+                        for data_line_id in object_id.data_line_ids:
+                            data_line_id.copy(
+                                {
+                                    'value': object_id.final_value,
+                                    'final_value': False,
+                                    'value_change': False,
+                                    'object_id': contract_object_id.id,
+                                }
+                            )
         self.status_movement = 'approved'
 
     def action_reject_move(self):
@@ -512,9 +590,6 @@ class SaleOrder(models.Model):
                 }
                 lst_commission.append(res)
         return lst_commission
-
-    def action_back_insurance_release(self):
-        self.status_movement = 'insurance_release'
 
     def import_object_data(self):
         self.ensure_one()
@@ -563,6 +638,10 @@ class SaleOrderType(models.Model):
     ],
         string="Tipo de Operación",
         default="positive"
+    )
+    view_id = fields.Many2one(
+        'ir.ui.view',
+        string="Vista a para mostrar",
     )
 
 

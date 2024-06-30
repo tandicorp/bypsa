@@ -13,7 +13,7 @@ class MailComposer(models.TransientModel):
             if crm.stage_id.id == self.env.ref("crm.stage_lead2").id:
                 crm.stage_id = self.env.ref("crm.stage_lead3").id
         if self.render_model == 'sale.order' and self.res_id:
-            self.env['sale.order'].browse(self.res_id).status_movement = 'insurance_release'
+            self.env['sale.order'].browse(self.res_id).action_release_move()
         if self.render_model == 'broker.claim' and self.res_id:
             self.env['broker.claim'].browse(self.res_id).state = 'insurer'
         return res

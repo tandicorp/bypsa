@@ -53,6 +53,7 @@
                                     <field name="is_amount_fee" widget="boolean_toggle"/>
                                     <field name="is_coverage" widget="boolean_toggle"/>
                                     <field name="is_deductible" widget="boolean_toggle"/>
+                                    <field name="is_limit" widget="boolean_toggle"/>
                                     <field name="title_line" string="Titulo Asociado" invisible="1" force_save="1"/>
                                 </tree>
                             </field>

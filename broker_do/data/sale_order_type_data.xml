@@ -60,6 +60,11 @@
         <field name="code">TXT</field>
         <field name="operation">positive</field>
     </record>
+    <record id="clearance_text_item_movement" model="sale.order.type">
+        <field name="name">TEXTO ACLARATORIO ITEM</field>
+        <field name="code">TXT</field>
+        <field name="operation">positive</field>
+    </record>
     <record id="transportation_application_movement" model="sale.order.type">
         <field name="name">APLICACIÓN DE TRANSPORTE</field>
         <field name="code">APT</field>

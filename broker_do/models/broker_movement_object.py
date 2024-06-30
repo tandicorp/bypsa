@@ -1,6 +1,7 @@
 from odoo import models, api, fields
 from lxml import etree
 from odoo.exceptions import ValidationError
+from odoo.addons.broker_do.models.broker_movement_branch import _TYPES
 from itertools import groupby
 import json
 from odoo.tools.misc import xlsxwriter
@@ -15,12 +16,22 @@ class BrokerMovementObject(models.Model):
     name = fields.Char(
         string='Nombre'
     )
+    # Campos modificatorios
+    active = fields.Boolean(
+        string="Activo",
+        default=True,
+    )
+    amount = fields.Integer(
+        string="Cantidad",
+        default=1
+    )
     movement_id = fields.Many2one(
         'sale.order',
         string="Anexo"
     )
     contract_id = fields.Many2one(
-        related='movement_id.contract_id',
+        'broker.contract',
+        string="Contrato",
         store=True
     )
     object_id = fields.Many2one(
@@ -31,6 +42,16 @@ class BrokerMovementObject(models.Model):
     parent_object_id = fields.Many2one(
         "broker.movement.object",
         string="Objeto Asegurado Padre"
+    )
+    # Objeto del contrato
+    contract_object_id = fields.Many2one(
+        "broker.movement.object",
+        string=u"Item póliza"
+    )
+    movement_object_ids = fields.One2many(
+        "broker.movement.object",
+        'contract_object_id',
+        string=u"Items generados en mov."
     )
     amount_fee = fields.Float(
         string="Prima Neta",
@@ -70,11 +91,12 @@ class BrokerMovementObject(models.Model):
         string="Acuerdos"
     )
     type_id = fields.Many2one(
-        related="movement_id.type_id"
+        related="movement_id.type_id",
+        store=True
     )
     movement_branch_id = fields.Many2one(
         "broker.movement.branch",
-        string="Plantilla de movimiento",
+        string="Ramo de movimiento",
         compute="get_movement_branch",
         store=True
     )
@@ -101,6 +123,11 @@ class BrokerMovementObject(models.Model):
         'broker.object.deductible',
         'object_id',
         string="Deducibles"
+    )
+    data_line_ids = fields.One2many(
+        'broker.movement.object.data',
+        "object_id",
+        string="Información del Objeto Asegurado"
     )
 
     @api.onchange("lead_id", "movement_id")
@@ -134,6 +161,32 @@ class BrokerMovementObject(models.Model):
                 if movement_branch_id:
                     record.movement_branch_id = movement_branch_id.id
 
+    @api.onchange("data_line_ids")
+    def _onchange_data_line(self):
+        for this in self:
+            datas = this.data_line_ids.filtered(
+                lambda data: data.add_value and data.type in ('float', 'integer')).mapped("value")
+            if datas:
+                this.amount_insured = sum([float(data) for data in datas])
+
+    @api.onchange("movement_branch_id")
+    def onchange_movement_branch_id(self):
+        record = self._origin if self._origin else self
+        if record.movement_branch_id and not record.data_line_ids:
+            lst_date = []
+            for movement in record.movement_branch_id.object_line_ids:
+                lst_date.append(
+                    fields.Command.create(
+                        {
+                            "name": movement.name,
+                            "type": movement.type,
+                            "add_value": movement.add_value,
+                            "value_field": movement.value,
+                        }
+                    )
+                )
+            record.data_line_ids = lst_date
+
     def generate_comparison(self):
         self.ensure_one()
         template = self.env.ref('broker_do.agreements_insurer_wizard_form')
@@ -156,86 +209,6 @@ class BrokerMovementObject(models.Model):
                 'default_template_id': self.coverage_template_id.id,
             },
         }
-
-    @api.model
-    def get_view(self, view_id=None, view_type='form', **options):
-        res = super(BrokerMovementObject, self).get_view(view_id, view_type, **options)
-        if view_type == 'form':
-            movement_branch = self.env['broker.movement.branch'].search([])
-            doc = etree.XML(res['arch'])
-            for root_node in doc.xpath("//group[@name='object_info']"):
-                for movement in movement_branch:
-                    attrs = json.dumps({'invisible': [('movement_branch_id', 'not in', movement.ids)]})
-                    group_node = etree.Element('group', {'string': '', 'modifiers': attrs})
-                    for conf in movement.object_line_ids:
-                        field_code = 'object_info_%s' % conf.id
-                        field_label = conf.name
-                        field_node = etree.Element('field',
-                                                   {'name': field_code, "string": field_label, 'type': conf.type})
-                        group_node.append(field_node)
-                    root_node.append(group_node)
-            for root_node_group in doc.xpath("//group[@name='group_info']"):
-                for movement in movement_branch:
-                    attrs = json.dumps({'invisible': [('movement_branch_id', 'not in', movement.ids)]})
-                    group_node = etree.Element('group', {'string': '', 'modifiers': attrs})
-                    for conf in movement.blanket_line_ids:
-                        field_code = 'object_info_%s' % conf.id
-                        field_label = conf.name
-                        field_node = etree.Element('field',
-                                                   {'name': field_code, "string": field_label, 'type': conf.type})
-                        group_node.append(field_node)
-                    root_node_group.append(group_node)
-            res['arch'] = etree.tostring(doc)
-        return res
-
-    @api.model
-    def get_views(self, views, options=None):
-        res = super().get_views(views, options)
-        movement_branch = self.env['broker.movement.branch'].search([])
-        for movement in movement_branch:
-            object_config = movement.object_line_ids + movement.blanket_line_ids
-            for conf in object_config:
-                field_code = 'object_info_%s' % conf.id
-                field_label = conf.name
-                values_model = {'name': field_code, "string": field_label, 'type': conf.type}
-                if conf.type == 'selection':
-                    cmp_select = [(param, param) for param in conf.value.split(',')]
-                    values_model.update({
-                        "selection": cmp_select
-                    })
-                res["models"][self._name][field_code] = values_model
-        return res
-
-    def read(self, fields=None, load='_classic_read'):
-        aux_fields = [field for field in fields if field.startswith(u'object_info_')]
-        fields = [field for field in fields if not field.startswith(u'object_info_')]
-        res = super(BrokerMovementObject, self).read(fields=fields, load=load)
-        for item in res:
-            for code in aux_fields:
-                item[code] = self.env['broker.movement.object.value'].get_value(item['id'], code)
-        return res
-
-    @api.model
-    def create(self, vals):
-        aux_vals = dict([(k, val) for k, val in vals.items() if k.startswith(u'object_info_')])
-        vals = dict([(k, val) for k, val in vals.items() if not k.startswith(u'object_info_')])
-        item = super(BrokerMovementObject, self).create(vals)
-        for code, value in aux_vals.items():
-            self.env['broker.movement.object.value'].set_value(item.id, code, value)
-        return item
-
-    def write(self, vals):
-        aux_vals = dict([(k, val) for k, val in vals.items() if k.startswith(u'object_info_')])
-        vals = dict([(k, val) for k, val in vals.items() if not k.startswith(u'object_info_')])
-        res = super(BrokerMovementObject, self).write(vals)
-        for item in self:
-            for code, value in aux_vals.items():
-                self.env['broker.movement.object.value'].set_value(item.id, code, value)
-        return res
-
-    def _update_cache(self, values, validate=True):
-        vals = dict([(k, val) for k, val in values.items() if not k.startswith(u'object_info_')])
-        return super()._update_cache(vals, validate=validate)
 
     def _onchange_branch_id(self):
         coverage_template_obj = self.env['coverage.template'].sudo()
@@ -355,46 +328,18 @@ class BrokerMovementObject(models.Model):
         agreement_id = agreement_obj.browse(agreement)
         if agreement_id.is_quotation:
             raise ValidationError("No se puede aceptar una cotización")
+        result = False
         for this in self:
             agree = this.agreements_line_ids.filtered(lambda line: line.agreement_id.id == agreement_id.id)
             agree.state = 'accept'
             if this.lead_id:
                 this.lead_id.stage_id = self.env.ref("broker_do.stage_lead5").id
+                result = True
             for agreement in this.agreements_line_ids:
                 if not agreement.id == agree.id:
                     agreement.state = 'draft'
-
-    def get_info_object(self):
-        object_value_obj = self.env['broker.movement.object.value'].sudo()
-        list_vals = []
-        for this in self:
-            res = {
-                "key": "Nombre",
-                "value": self.name
-            }
-            list_vals.append(res)
-            if this.type == 'normal':
-                values = object_value_obj.search([('movement_object_id', '=', this.id), ('value_char', '!=', False),
-                                                  ('movement_branch_object_id.movement_branch_id', '=',
-                                                   this.movement_branch_id.id)])
-                for val in values:
-                    res = {
-                        "key": val.movement_branch_object_id.name,
-                        "value": val.value_char
-                    }
-                    list_vals.append(res)
-            else:
-                res = {
-                    "key": "Cantidad",
-                    "value": self.amount
-                }
-                list_vals.append(res)
-                res = {
-                    "key": "Observación",
-                    "value": self.comment
-                }
-                list_vals.append(res)
-            return list_vals
+        self.clear_caches()
+        return result
 
     def export_object_data(self, movement_branch=False):
         """Permite obtener el formato de Objeto Asegurado"""
@@ -407,14 +352,11 @@ class BrokerMovementObject(models.Model):
         worksheet = workbook.add_worksheet('Formato Objeto')
         style_highlight = workbook.add_format({'bold': True, 'pattern': 1, 'bg_color': '#E0E0E0', 'align': 'center'})
         row, col = 0, 1
-        worksheet.write(1, 0, "Nombre Objeto", style_highlight)
+        worksheet.write(0, 0, "Nombre Objeto", style_highlight)
         worksheet.set_column(0, 0, 30)
         for object_line in movement_branch_id.object_line_ids:
-            name = object_line.name + " - " + object_line.type
-            if object_line.type == 'selection':
-                name = name + "( " + object_line.value + " )"
-            worksheet.write(row, col, object_line.id, style_highlight)
-            worksheet.write(row + 1, col, name, style_highlight)
+            name = object_line.name
+            worksheet.write(row, col, name, style_highlight)
             worksheet.set_column(col, col, 30)
             col += 1
         workbook.close()
@@ -476,28 +418,22 @@ class BrokerMovementObject(models.Model):
             objects = self
         else:
             objects = self + self.child_line_ids
-        broker_objects = broker_value_obj.search(
-            [("movement_object_id", "in", objects.ids), ('value_char', '!=', False)],
-            order="movement_branch_object_id asc")
         lst_object = []
         title = False
-        object_config = self.movement_branch_id.object_line_ids.ids
         for object in objects:
-            broker_objects = broker_value_obj.search([('movement_branch_object_id', 'in', object_config),
-                                                      ("movement_object_id", "=", object.id),
-                                                      ('value_char', '!=', False)],
-                                                     order="movement_branch_object_id asc")
+            data_lines = object.data_line_ids.filtered(lambda data: not data.value == "")
             if not title:
-                lst_object.append(broker_objects.mapped('movement_branch_object_id.name'))
+                lst_object.append(object.data_line_ids.mapped('name'))
                 title = True
-            lst_object.append(broker_objects.mapped('value_char'))
+            lst_object.append(object.data_line_ids.mapped('value'))
         return lst_object
 
     def get_info_comparison_object(self, is_quotation=False):
         groups = {}
         agreeements = self.agreements_line_ids.mapped("agreement_id").filtered(
             lambda agree: agree.is_quotation == is_quotation)
-        sorted_agreements = sorted(agreeements.mapped("agreements_line_ids"), key=lambda line: line.coverage_line_id.id)
+        sorted_agreements = sorted(agreeements.mapped("agreements_line_ids"),
+                                   key=lambda line: line.coverage_line_id.sequence)
         for key, group in groupby(sorted_agreements, key=lambda x: x.coverage_line_id.id):
             groups[key] = list(group)
         section = []
@@ -513,7 +449,7 @@ class BrokerMovementObject(models.Model):
             for line in groups:
                 res = {
                     "value": str(line.value) if line.value else "N/A",
-                    "insurer_name": str(line.agreements_id.insurer_id.name if line.agreements_id.insurer_id else "" )
+                    "insurer_name": str(line.agreements_id.insurer_id.name if line.agreements_id.insurer_id else "")
                 }
                 lines.append(res)
             res_section.update({
@@ -523,6 +459,60 @@ class BrokerMovementObject(models.Model):
                 res_section
             )
         return section
+
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        default = dict(default or {})
+        # copiar información adicional
+        list_info = []
+        for object_info in self.info_line_ids:
+            list_info.append(fields.Command.Create({
+                "name": object_info.name,
+                "comment": object_info.comment,
+            }))
+            # Copiar Acuedo ganador
+        lines = []
+        for agree in self.agreements_line_ids.filtered(lambda x: x.state == 'accept'):
+            agree_cp = agree.agreement_id.copy({"coverage_id": self.coverage_template_id.id})
+            lines.append(fields.Command.create({
+                "agreement_id": agree_cp.id
+            }))
+        # Copiar Informacion del objeto asegurado
+        datas = []
+        for data in self.data_line_ids:
+            datas.append(fields.Command.create({
+                "name": data.name,
+                "value": data.value,
+                "value_field": data.value_field,
+                "type": data.type,
+                "add_value": data.add_value,
+            }))
+        default.update({
+            "name": self.name,
+            "amount_fee": self.amount_fee,
+            "amount_insured": self.amount_insured,
+            "type": self.type,
+            "branch_id": self.branch_id.id,
+            'info_line_ids': list_info,
+            'agreements_line_ids': lines,
+            'data_line_ids': datas,
+        })
+        new_object = super(BrokerMovementObject, self).copy(default=default)
+        return new_object
+
+    def config_field(self):
+        self.ensure_one()
+        return {
+            'name': self.name,
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'broker.movement.object.data',
+            'context': {
+                'default_object_id': self.id,
+            },
+            'target': 'new',
+        }
 
 
 class BrokerMovementObjectValue(models.Model):
@@ -590,8 +580,57 @@ class BrokerMovementObjectLine(models.Model):
     )
     object_id = fields.Many2one(
         "broker.movement.object",
-        string="Oportunidad"
+        string="Objeto Asegurado"
     )
+
+
+class BrokerMovementObjectData(models.Model):
+    _name = 'broker.movement.object.data'
+    _description = 'Información del Objeto Asegurado'
+
+    name = fields.Char(
+        string="Nombre",
+        required=True
+    )
+    value = fields.Char(
+        string="Valor"
+    )
+    type = fields.Selection(
+        _TYPES,
+        string="Tipo",
+        required=True,
+        default="char"
+    )
+    value_change = fields.Char(
+        string=u"Modificación"
+    )
+    final_value = fields.Char(
+        string=u"Valor final"
+    )
+    value_field = fields.Text(
+        string="Valores por defecto",
+        help="Usado para el listado de los campos de tipo Selection"
+    )
+    add_value = fields.Boolean(
+        string="¿Suma al Valor?",
+        default=False,
+    )
+    object_id = fields.Many2one(
+        "broker.movement.object",
+        string="Objeto Asegurado",
+    )
+
+    def config_field(self):
+        self.ensure_one()
+        return {
+            'name': self.name,
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'broker.movement.object.data',
+            'res_id': self.id,
+            'target': 'new',
+        }
 
 
 class MovementObjectAgreement(models.Model):

@@ -77,7 +77,7 @@
                                     <field name="amount_difference" force_save="1" sum="Total diferencias"/>
                                     <field name="commission_to_adjust" widget="boolean_toggle"/>
                                     <field name="create_commission" widget="boolean_toggle"/>
-                                    <button name="action_create_commission" icon="fa-pencil-square-o"/>
+                                    <button name="action_create_commission" type="object" icon="fa-pencil-square-o"/>
                                 </tree>
                             </field>
                         </page>

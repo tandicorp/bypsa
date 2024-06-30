@@ -282,23 +282,19 @@
 
         <record id="mail_template_send_email_request_quotation" model="mail.template">
             <field name="name">Broker Do: Petición de Cotización</field>
-            <field name="model_id" ref="broker_do.model_broker_contract"/>
+            <field name="model_id" ref="crm.model_crm_lead"/>
             <field name="subject">Cotizacion: {{ object.name }}</field>
             <field name="email_from">{{(user.email_formatted) }}</field>
-            <field name="email_to">{{object.client_id.email}}</field>
-            <field name="description">Notificación al cliente sobre la renovación del contrato</field>
+            <field name="email_to">{{object.partner_id.email}}</field>
+            <field name="description">Pedir a la aseguradora una cotizacion</field>
             <field name="body_html" type="html">
                 <div class="container-fluid" style="font-size: 11px;">
                     <div class="card border-0">
                         <div class="card-body border-0">
-                            <p>Estimad@</p>
-                            <p>
-                                <t t-out="object.client_id.name"/>
-                            </p>
+                            <p>Estimad@s</p>
                             <p>Presente</p>
-                            <p>Reciba un cordial saludo de quienes conformamos su broker de seguros bypsa, Solicitamos
-                                la cotización de úna póliza con la información que se envia en el archivo adjunto
-                            </p>
+                            <p>Reciba un cordial saludo de quienes conformamos su broker de seguros bypsa, Solicitamos la
+                                cotización de úna póliza con la información que se envia en el archivo adjunto</p>
                             <p>En espera de sus importantes comentarios.</p>
                             <p>Saludos cordiales.</p>
                         </div>
@@ -344,7 +340,7 @@
 
                 </div>
             </field>
-            <field name="lang">{{object.client_id.lang}}</field>
+            <field name="lang">{{object.partner_id.lang}}</field>
             <field name="auto_delete" eval="True"/>
         </record>
 
@@ -473,7 +469,7 @@
                     </div>
                 </div>
             </field>
-            <field name="lang">{{object.client_id.lang}}</field>
+            <field name="lang">{{object.partner_id.lang}}</field>
             <field name="auto_delete" eval="True"/>
         </record>
     </data>

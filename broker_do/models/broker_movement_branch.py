@@ -99,6 +99,10 @@ class BrokerMovementBranchObject(models.Model):
         "broker.movement.branch",
         string="Ramo"
     )
+    add_value = fields.Boolean(
+        string="Suma al Valor?",
+        default=False,
+    )
 
 
 class BrokerMovementDocument(models.Model):

@@ -19,8 +19,7 @@
                         <group string="Información del contenedor" colspan="2">
                             <group>
                                 <field name="client_id"
-                                       domain="[('partner_type_id','!=',%(broker_do.insurance_company_data)d)]"
-                                />
+                                       domain="[('partner_type_id','!=',%(broker_do.insurance_company_data)d)]"/>
                                 <field name="branch_id"/>
                                 <field name="insurer_id"
                                        domain="[('partner_type_id','=',%(broker_do.insurance_company_data)d)]"/>
@@ -38,11 +37,27 @@
                                                                  'default_insurer_id': insurer_id,
                                                                  'default_contract_num': container_num
                                                                  }">
-                                <tree>
-                                    <field name="name" string="No. Contrato"/>
-                                    <field name="client_id"/>
+                                <tree editable="bottom">
+                                    <field name="client_id" optional="hide"
+                                           domain="[('partner_type_id','!=',%(broker_do.insurance_company_data)d)]"
+                                           attrs="{'readonly': [('state','!=','draft')]}"/>
+                                    <field name="insurer_id" optional="hide"
+                                           domain="[('partner_type_id','=',%(broker_do.insurance_company_data)d)]"
+                                           attrs="{'readonly': [('state','!=','draft')]}"/>
                                     <field name="contract_num"/>
                                     <field name="annex_num"/>
+                                    <field name="branch_id" options="{'no_create': True}"
+                                           attrs="{'readonly': [('state','!=','draft')]}"/>
+                                    <field name="business_id" options="{'no_create': True}" required="1"
+                                           attrs="{'readonly': [('state','!=','draft')]}"/>
+                                    <field name="commission_percentage" widget="percentage"
+                                           attrs="{'readonly': [('state','!=','draft')]}"/>
+                                    <field name="period_type" attrs="{'readonly': [('state','!=','draft')]}"/>
+                                    <field name="date_start" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
+                                    <field name="date_end" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
+                                    <field name="state" readonly="1"/>
+                                    <button type="object" name="action_open_contract" title="Póliza"
+                                            icon="fa-external-link"/>
                                 </tree>
                             </field>
                         </page>
@@ -92,7 +107,7 @@
                             attrs="{'invisible': [('state','!=', 'draft')]}"
                             name="action_valid_contract"/>
                     <button class="oe_highlight oe_stat_button" type="object" string="Regresar a pendiente"
-                            attrs="{'invisible': [('state','!=', 'draft')]}"
+                            attrs="{'invisible': [('state','=', 'draft')]}"
                             name="action_draft" groups="broker_do.group_supervisor_contract"/>
                 </header>
                 <sheet>
@@ -131,7 +146,8 @@
                                        attrs="{'readonly': [('state','!=','draft')]}"/>
                                 <field name="container_id" string="Póliza maestra"
                                        attrs="{'readonly': [('state','!=','draft')]}"/>
-                                <field name="annex_num" attrs="{'invisible': [('container_id','=',False)], 'readonly': [('state','!=','draft')]}"/>
+                                <field name="annex_num"
+                                       attrs="{'invisible': [('container_id','=',False)], 'readonly': [('state','!=','draft')]}"/>
                                 <field name="num_insured_items" attrs="{'readonly': [('state','!=','draft')]}"/>
                             </group>
                             <group>
@@ -144,10 +160,13 @@
                             </group>
                         </group>
                         <group string="Fecha de vigencia">
-                            <field name="period_type" attrs="{'readonly': [('state','!=','draft')]}"/>
+                            <field name="open_date_contract" attrs="{'invisible': [('branch_id','!=',%(broker_do.broker_branch_transport)d)]}"/>
+                            <field name="period_type" attrs="{'readonly': [('state','!=','draft')], 'invisible': [('open_date_contract','=',True)]}"/>
                             <field name="date_start" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
-                            <field name="date_end" required="1" attrs="{'readonly': [('state','!=','draft')]}"/>
+                            <field name="date_end" required="1" attrs="{'readonly': [('state','!=','draft')], 'invisible': [('open_date_contract','=',True)]}"/>
                             <field name="user_id" invisible="1" readonly="1" force_save="1"/>
+                            <field name="day_number" force_save="1"
+                                   attrs="{'invisible': ['|',('day_number','=',False),('open_date_contract','=',True)], 'readonly': True}"/>
                         </group>
                     </group>
                     <group/>
@@ -238,7 +257,7 @@
                             </field>
                         </page>
                         <page name="objects" string="Objetos Asegurados">
-                            <field name="object_ids">
+                            <field name="contract_object_ids">
                                 <tree string="Objetos Asegurados" readonly="1">
                                     <field name="name"/>
                                     <field name="type"/>
@@ -292,6 +311,7 @@
                 <field name="date_end"/>
                 <field name="branch_id"/>
                 <field name="business_id"/>
+                <field name="state"/>
             </tree>
         </field>
     </record>
@@ -363,8 +383,8 @@
     </record>
 
     <!--    Acciones de servidor-->
-    <record id="model_broker_contract_renewal" model="ir.actions.server">
-        <field name="name">Vincular a póliza maestra</field>
+    <record id="model_broker_contract_link_container" model="ir.actions.server">
+        <field name="name">Vincular con póliza maestra</field>
         <field name="model_id" ref="broker_do.model_broker_contract"/>
         <field name="binding_model_id" ref="broker_do.model_broker_contract"/>
         <field name="binding_view_types">form,list</field>

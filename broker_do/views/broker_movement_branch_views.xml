@@ -46,6 +46,7 @@
                                         <field name="name"/>
                                         <field name="type"/>
                                         <field name="value"/>
+                                        <field name="add_value" widget="boolean_toggle"/>
                                     </tree>
                                 </field>
                             </page>

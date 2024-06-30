@@ -304,7 +304,7 @@ class BrokerClaim(models.Model):
             agree_accept = self.object_id.agreements_line_ids.filtered(lambda mov: mov.state == 'accept')
             if agree_accept:
                 lines = agree_accept[0].agreement_id.mapped("agreements_line_ids").filtered(
-                    lambda line: line.display_type == 'attribute')
+                    lambda line: line.is_coverage)
                 res['domain']['coverage_line_id'] = [('id', 'in', lines.ids)]
             actual_deductible_id = self.deductible_id.id
             self.deductible_id = False if actual_deductible_id not in self.object_id.deductible_ids.ids else actual_deductible_id
@@ -312,7 +312,9 @@ class BrokerClaim(models.Model):
 
     @api.onchange('client_id')
     def _onchange_client(self):
-        self.contract_id = False
+        ctxt = self.env.context
+        if not ctxt.get("default_contract_id"):
+            self.contract_id = False
 
     def action_view_notice_claim(self):
         self.ensure_one()

@@ -96,6 +96,7 @@ class CoverageTemplate(models.Model):
                 "is_coverage": line.is_coverage,
                 "is_deductible": line.is_deductible,
                 "tooltip": line.tooltip,
+                "is_limit": line.is_limit,
             }))
         coverage.coverage_line_ids = list_lines
         coverage._onchange_line_sequence()
@@ -147,6 +148,10 @@ class CoverageTemplateLine(models.Model):
     )
     is_deductible = fields.Boolean(
         string="¿Deducible?",
+        default=False
+    )
+    is_limit = fields.Boolean(
+        string="¿Límite?",
         default=False
     )
     tooltip = fields.Text(

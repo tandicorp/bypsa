@@ -91,21 +91,21 @@
                                 <t t-if="line.coverage">
                                 <div class="input-group">
                                     <span class="input-group-text">V.A.</span>
-                                    <input t-att-type="number" class="form-control list-group-item-custom"
+                                    <input type="number" class="form-control list-group-item-custom"
                                            placeholder="Ingrese el Valor Asegurado" min="0"
                                            aria-label="Ingrese el valor" t-att-value="line.amount_insured"
                                            t-att-id="line.id"
                                            aria-describedby="basic-addon2" style=" background: aliceblue;"
                                            t-on-change="ev => this.OnChangeEdit(line.id,'amount_insured', ev)"/>
                                     <span class="input-group-text">TASA</span>
-                                    <input t-att-type="text" class="form-control list-group-item-custom"
+                                    <input type="text" class="form-control list-group-item-custom"
                                            placeholder="Ingrese la tasa %"
                                            aria-label="Ingrese el valor" t-att-value="line.rate"
                                            t-att-id="line.id"
                                            aria-describedby="basic-addon2" style=" background: aliceblue;"
                                            t-on-change="ev => this.OnChangeEdit(line.id,'rate', ev)"/>
                                     <span class="input-group-text">PRIMA</span>
-                                    <input t-att-type="text" class="form-control list-group-item-custom"
+                                    <input type="text" class="form-control list-group-item-custom"
                                            placeholder="Ingrese el valor"
                                            aria-label="Ingrese el valor" t-att-value="line.value"
                                            t-att-id="line.id"
