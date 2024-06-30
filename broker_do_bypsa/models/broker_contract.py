@@ -17,7 +17,7 @@ class BrokerContract(models.Model):
         for this in self:
             branch_code = this.branch_id and this.branch_id.code or ""
             contract_num = this.contract_num or ''
-            this.name = " - ".join([branch_code, contract_num, str(this.annex_num) or ''])
+            this.name = " - ".join([x for x in [branch_code, contract_num, str(this.annex_num) or ''] if x])
 
     @api.onchange('date_start')
     def onchange_date_start(self):

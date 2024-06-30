@@ -6,15 +6,17 @@
         <field name="model">broker.contract</field>
         <field name="inherit_id" ref="broker_do.broker_contract_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='annex_num']" position="replace"/>
             <xpath expr="//field[@name='version']" position="attributes">
                 <attribute name="required">0</attribute>
             </xpath>
             <xpath expr="//field[@name='version']" position="before">
                 <field name="annex_num" attrs="{'readonly': [('state','!=','draft')]}"/>
             </xpath>
+            <xpath expr="//field[@name='annex_num']" position="attributes">
+                <attribute name="attrs">{'readonly': [('state','!=','draft')]}</attribute>
+            </xpath>
             <xpath expr="//field[@name='container_id']" position="attributes">
-                <attribute name="invisible">1</attribute>
+                <attribute name="attrs">{'invisible': [('container_id','=',False)]}</attribute>
             </xpath>
             <xpath expr="//field[@name='num_insured_items']" position="attributes">
                 <attribute name="readonly">1</attribute>

@@ -14,8 +14,12 @@
     ],
     'data': [
         'data/broker_movement_branch_data.xml',
+        'data/broker.depreciation.model.csv',
+        'data/broker_depreciation_data.xml',
         'views/broker_movement_views.xml',
+        'views/broker_depreciation_views.xml',
         'views/broker_contract_views.xml',
+        'security/ir.model.access.csv',
     ],
     'assets': {
     },
