@@ -51,6 +51,7 @@
                             <field name="company_id" invisible="1"/>
                             <field name="movement_branch_id" invisible="1"/>
                             <field name="branch_id" invisible="1"/>
+                            <field name="is_manual_fee"/>
                         </group>
                         <group string="Montos de la movimiento">
                             <field name="amount_fee"
@@ -127,8 +128,8 @@
                                     <field name="partner_contract_id"/>
                                     <field name="provisional_payment_date"/>
                                     <field name="invoice_number"/>
-                                    <field name="amount_insurance_fee" optional="hide"/>
-                                    <field name="amount_insurance_due"/>
+                                    <field name="amount_insurance_fee" optional="hide" sum="Total"/>
+                                    <field name="amount_insurance_due" sum="Total"/>
                                     <field name="status_fee" readonly="1"/>
                                 </tree>
                             </field>
@@ -500,7 +501,9 @@
                             <field name="amount_insured" required="1"
                                    attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}"/>
                         </group>
-                        <group/>
+                        <group>
+                            <field name="rate" force_save="1" widget="percentage"/>
+                        </group>
                     </group>
                     <group>
                         <group>
@@ -524,6 +527,7 @@
                             <field name="data_line_ids"
                                    attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}">
                                 <tree editable="bottom" multi_edit="0" sample="1" create="0">
+                                     <field name="sequence" widget="handle"/>
                                     <field name="name"
                                            attrs="{'readonly': [('parent.type_id','not in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
                                     <field name="value" widget="widget_type"
@@ -599,6 +603,11 @@
                 </sheet>
                 <xpath expr="//button[hasclass('o_form_button_save_new')]" position="replace">
                 </xpath>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread" options="{'post_refresh': 'recipients'}"/>
+                </div>
             </form>
         </field>
     </record>

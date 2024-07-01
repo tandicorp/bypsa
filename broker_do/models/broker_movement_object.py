@@ -12,6 +12,7 @@ import base64
 class BrokerMovementObject(models.Model):
     _name = 'broker.movement.object'
     _description = 'Objetos Asegurados de Anexo'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(
         string='Nombre'
@@ -128,6 +129,9 @@ class BrokerMovementObject(models.Model):
         'broker.movement.object.data',
         "object_id",
         string="Información del Objeto Asegurado"
+    )
+    rate = fields.Float(
+        string="Tasa",
     )
 
     @api.onchange("lead_id", "movement_id")
@@ -587,6 +591,12 @@ class BrokerMovementObjectLine(models.Model):
 class BrokerMovementObjectData(models.Model):
     _name = 'broker.movement.object.data'
     _description = 'Información del Objeto Asegurado'
+    _order = "sequence asc"
+
+    sequence = fields.Integer(
+        string='Secuencia',
+        default=lambda x: int(x.id)
+    )
 
     name = fields.Char(
         string="Nombre",

@@ -1,4 +1,5 @@
 from odoo import fields, models, api
+from odoo.exceptions import ValidationError
 
 
 class BrokerDepreciation(models.Model):
@@ -21,6 +22,16 @@ class BrokerDepreciation(models.Model):
         "depreciation_id",
         string="Lineas de depreciación"
     )
+
+    def get_amount_insured_depreciation(self, amount_origin, year):
+        amount = amount_origin
+        rate_depreciation = self.depreciation_lines.mapped("depreciation")
+        if year > len(rate_depreciation):
+            raise ValidationError("No existe un año de depreciacion configurado")
+        for i in range(year):
+            anual_depreciation = amount * rate_depreciation[i]
+            amount -= anual_depreciation
+        return amount, anual_depreciation
 
 
 class BrokerDepreciationLine(models.Model):
