@@ -594,8 +594,7 @@ class BrokerMovementObjectData(models.Model):
     _order = "sequence asc"
 
     sequence = fields.Integer(
-        string='Secuencia',
-        default=lambda x: int(x.id)
+        string='Secuencia'
     )
 
     name = fields.Char(
