@@ -159,9 +159,8 @@ class CrmLead(models.Model):
             self.renewal_id.in_renewal = False
         current_contract = contract_obj.create(contract_data)
         current_contract.onchange_insurance_company()
-        current_contract._compute_type_period()
+        current_contract.compute_type_period()
         current_contract.movement_ids[0].onchange_amounts_for_commission()
-        current_contract._onchange_type_period()
         current_contract.movement_ids[0].action_calculate_fee()
         return current_contract
 

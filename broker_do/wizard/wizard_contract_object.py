@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _, Command
+from odoo import fields, models, api
 
 
 class WizardContractContainer(models.TransientModel):

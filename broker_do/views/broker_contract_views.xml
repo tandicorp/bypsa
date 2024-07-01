@@ -257,8 +257,8 @@
                             </field>
                         </page>
                         <page name="objects" string="Objetos Asegurados">
-                            <field name="contract_object_ids">
-                                <tree string="Objetos Asegurados" readonly="1">
+                            <field name="contract_object_ids" readonly="1">
+                                <tree string="Objetos Asegurados">
                                     <field name="name"/>
                                     <field name="type"/>
                                 </tree>

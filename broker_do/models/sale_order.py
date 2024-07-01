@@ -540,14 +540,25 @@ class SaleOrder(models.Model):
                 object_id.contract_object_id.active = False
             # Actualizacion del objeto del contrato por sus cambios en el movimiento
             else:
-                for line_id in self.data_line_ids:
-                    line_id.copy(
-                        {
-                            'value': line_id.final_value,
-                            'final_value': False,
-                            'value_change': False,
-                        }
-                    )
+                for object_id in self.object_line_ids:
+                    if not object_id.contract_object_id:
+                        contract_object_id = object_id.copy({
+                            'contract_id': self.contract_id.id,
+                            'movement_id': False,
+                        })
+                        object_id.contract_object_id = contract_object_id.id
+                    else:
+                        contract_object_id = object_id.contract_object_id
+                        contract_object_id.data_line_ids.unlink()
+                        for data_line_id in object_id.data_line_ids:
+                            data_line_id.copy(
+                                {
+                                    'value': data_line_id.final_value,
+                                    'final_value': False,
+                                    'value_change': False,
+                                    'object_id': contract_object_id.id,
+                                }
+                            )
         self.status_movement = 'approved'
 
     def action_reject_move(self):

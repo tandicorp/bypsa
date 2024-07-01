@@ -4,108 +4,90 @@
         <field name="name">PÓLIZA</field>
         <field name="code">POL</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_form"/>
     </record>
     <record id="inclusion_movement" model="sale.order.type">
         <field name="name">INCLUSIÓN</field>
         <field name="code">INC</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_form"/>
     </record>
     <record id="plan_change_movement" model="sale.order.type">
         <field name="name">CAMBIO DE PLAN</field>
         <field name="code">CPL</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_item_move_form"/>
     </record>
     <record id="raise_value_movement" model="sale.order.type">
         <field name="name">AUMENTO DE VALOR</field>
         <field name="code">AVA</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_item_move_form"/>
     </record>
     <record id="reduce_value_movement" model="sale.order.type">
         <field name="name">REBAJA DE VALOR</field>
         <field name="code">RVA</field>
         <field name="operation">negative</field>
-        <field name="view_id" ref="sale_order_item_move_form"/>
     </record>
     <record id="raise_premium_movement" model="sale.order.type">
         <field name="name">AUMENTO DE PRIMA</field>
         <field name="code">APR</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_item_move_form"/>
     </record>
     <record id="reduce_premium_movement" model="sale.order.type">
         <field name="name">REBAJA DE PRIMA</field>
         <field name="code">RPR</field>
         <field name="operation">negative</field>
-        <field name="view_id" ref="sale_order_item_move_form"/>
     </record>
     <record id="exclusion_movement" model="sale.order.type">
         <field name="name">EXCLUSIÓN</field>
         <field name="code">EXC</field>
         <field name="operation">negative</field>
-        <field name="view_id" ref="sale_order_item_move_form"/>
     </record>
     <record id="cancel_movement" model="sale.order.type">
         <field name="name">CANCELACIÓN</field>
         <field name="code">CAN</field>
         <field name="operation">negative</field>
-        <field name="view_id" ref="sale_order_contract_move_form"/>
     </record>
     <record id="validity_extension_movement" model="sale.order.type">
         <field name="name">EXTENSIÓN DE VIGENCIA</field>
         <field name="code">VIG</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_contract_move_form"/>
     </record>
     <record id="rasa_movement" model="sale.order.type">
         <field name="name">RESTITUCIÓN AUTOMÁTICA DE SUMA ASEGURADA</field>
         <field name="code">RASA</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_item_move_form"/>
     </record>
     <record id="clearance_text_movement" model="sale.order.type">
         <field name="name">TEXTO ACLARATORIO</field>
         <field name="code">TXT</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_contract_move_form"/>
     </record>
     <record id="clearance_text_item_movement" model="sale.order.type">
         <field name="name">TEXTO ACLARATORIO ITEM</field>
         <field name="code">TXT</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_item_move_form"/>
     </record>
     <record id="transportation_application_movement" model="sale.order.type">
         <field name="name">APLICACIÓN DE TRANSPORTE</field>
         <field name="code">APT</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_form"/>
     </record>
     <record id="declaration_travel_movement" model="sale.order.type">
         <field name="name">DECLARACIÓN DE VIAJES</field>
         <field name="code">DVI</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_form"/>
     </record>
     <record id="monthly_declaration_movement" model="sale.order.type">
         <field name="name">DECLARACIÓN MENSUAL</field>
         <field name="code">DEM</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_form"/>
     </record>
     <record id="discount_extra_charges" model="sale.order.type">
         <field name="name">DESCUENTO</field>
         <field name="code">DES</field>
         <field name="operation">positive</field>
-        <field name="view_id" ref="sale_order_contract_move_form"/>
     </record>
     <record id="extra_recharges" model="sale.order.type">
         <field name="name">RECARGO</field>
         <field name="code">REC</field>
         <field name="operation">negative</field>
-        <field name="view_id" ref="sale_order_contract_move_form"/>
     </record>
 </odoo>

@@ -184,7 +184,7 @@ class BrokerContract(models.Model):
         """Calculo de periodos al crear una poliza"""
         res = super(BrokerContract, self).create(vals_list)
         for record in res:
-            record._compute_type_period()
+            record.compute_type_period()
         return res
 
     def write(self, vals):
@@ -192,7 +192,7 @@ class BrokerContract(models.Model):
         res = super(BrokerContract, self).write(vals)
         if [x for x in _FIELDS_PERIOD_CHANGE if x in vals]:
             for record in self:
-                record._compute_type_period()
+                record.compute_type_period()
         return res
 
     def unlink(self):
@@ -207,7 +207,7 @@ class BrokerContract(models.Model):
             )
         return super(BrokerContract, self).unlink()
 
-    def _compute_type_period(self):
+    def compute_type_period(self):
         def distance_month(date_start, date_end):
             """Permite obtener los meses de distancia entre dos fechas"""
             fecha_inicial = datetime.strptime(date_start, "%Y-%m-%d")
@@ -311,7 +311,7 @@ class BrokerContract(models.Model):
             movements = record.movement_ids.filtered(lambda mov: not mov.type_id.id == type_exclude.id)
             objects = movements.mapped("object_line_ids")
             objects_final = [obj.id for obj in set(objects - objects_exclude)]
-            record.object_ids = [Command.set(objects_final)]
+            record.contract_object_ids = [Command.set(objects_final)]
 
     def _get_branch_id_domain(self):
         res = [('id', '=', 0)]
@@ -404,7 +404,7 @@ class BrokerContract(models.Model):
                 "business_id": contract.business_id.id,
             }
             crm = crm_lead_obj.create(res)
-            for object_id in contract.object_ids:
+            for object_id in contract.contract_object_ids:
                 object_id.copy({
                     "lead_id": crm.id
                 })

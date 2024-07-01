@@ -605,7 +605,9 @@ class BrokerMovementObjectData(models.Model):
         string=u"Modificación"
     )
     final_value = fields.Char(
-        string=u"Valor final"
+        string=u"Valor final",
+        compute='_compute_final_value',
+        store=True
     )
     value_field = fields.Text(
         string="Valores por defecto",
@@ -619,6 +621,16 @@ class BrokerMovementObjectData(models.Model):
         "broker.movement.object",
         string="Objeto Asegurado",
     )
+
+    @api.depends('value_change')
+    def _compute_final_value(self):
+        for record in self:
+            try:
+                value_change = float(record.value_change)
+                value_change = float(record.value) + value_change
+            except Exception as e:
+                value_change = record.value_change
+            record.final_value = value_change
 
     def config_field(self):
         self.ensure_one()

@@ -524,12 +524,14 @@
                             <field name="data_line_ids"
                                    attrs="{'readonly': [('type_id','=',%(broker_do.exclusion_movement)d)]}">
                                 <tree editable="bottom" multi_edit="0" sample="1" create="0">
-                                    <field name="name"/>
-                                    <field name="value" widget="widget_type"/>
+                                    <field name="name"
+                                           attrs="{'readonly': [('parent.type_id','not in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
+                                    <field name="value" widget="widget_type"
+                                           attrs="{'readonly': [('parent.type_id','not in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
                                     <field name="value_change"
-                                           attrs="{'invisible': [('parent.type_id','in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
-                                    <field name="final_value" readonly="1"
-                                           attrs="{'invisible': [('parent.type_id','in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
+                                           attrs="{'column_invisible': [('parent.type_id','in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
+                                    <field name="final_value" readonly="1" force_save="1"
+                                           attrs="{'column_invisible': [('parent.type_id','in',(%(broker_do.policy_movement)d,%(broker_do.transportation_application_movement)d,%(broker_do.inclusion_movement)d,%(broker_do.exclusion_movement)d))]}"/>
                                     <field name="type" optional="hide"/>
                                     <field name="value_field" optional="hide"/>
                                     <field name="add_value" optional="hide" widget="boolean_toggle"/>
@@ -539,7 +541,8 @@
                                 </tree>
                             </field>
                         </page>
-                        <page name="page_blanket" string="Información Blanket" attrs="{'invisible': [('type','!=','blanket')]}">
+                        <page name="page_blanket" string="Información Blanket"
+                              attrs="{'invisible': [('type','!=','blanket')]}">
                             <group>
                                 <group>
                                     <field name="amount"
