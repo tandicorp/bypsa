@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sale_order_contract_move_form" model="ir.ui.view">
+        <field name="name">sale.order.contract.move.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="broker_do.sale_order_form"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook//page[@name='Objetos Asegurados']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="sale_order_item_move_form" model="ir.ui.view">
+        <field name="name">sale.order.item.move.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="broker_do.sale_order_contract_move_form"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_calculate_fee']" position="before">
+                <button type="object" name="action_select_object" string="Seleccionar item a modificar"
+                            class="oe_highlight oe_stat_button size_buttons"/>
+            </xpath>
+            <xpath expr="//notebook//page[@name='Objetos Asegurados']" position="before">
+                <page name="Objetos Asegurados">
+                    <field name="object_line_ids" widget="many2many" context="{'default_movement_branch_id': movement_branch_id}">
+                        <tree create="0" sample="1">
+                            <field name="name"/>
+                            <field name="type"/>
+                            <field name="amount_insured"/>
+                            <field name="agreement_id"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+<!--    <record id="sale_order_item_move_form" model="ir.ui.view">-->
+<!--        <field name="name">sale.order.item.move.form</field>-->
+<!--        <field name="model">sale.order</field>-->
+<!--        <field name="inherit_id" ref="broker_do.sale_order_contract_move_form"/>-->
+<!--        <field name="mode">primary</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <xpath expr="//notebook//page[@name='Objetos Asegurados']" position="before">-->
+<!--                <page name="Objetos Asegurados">-->
+<!--                    <field name="contract_object_ids" widget="many2many" context="{'default_movement_branch_id': movement_branch_id}">-->
+<!--                        <tree>-->
+<!--                            <field name="name"/>-->
+<!--                            <field name="type"/>-->
+<!--                            <field name="amount_insured"/>-->
+<!--                            <field name="agreement_id"/>-->
+<!--                        </tree>-->
+<!--                    </field>-->
+<!--                </page>-->
+<!--            </xpath>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    <record id="sale_order_search" model="ir.ui.view">-->
+<!--        <field name="name">sale.order.search</field>-->
+<!--        <field name="model">sale.order</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <search string="Búsqueda de contratos">-->
+<!--                <filter string="Borrador" name="draft" domain="[('status_movement', '=', 'draft')]"/>-->
+<!--                <filter string="Remitido aseguradora" name="valid"-->
+<!--                        domain="[('status_movement','=','insurance_release')]"/>-->
+<!--                <separator/>-->
+<!--                <field name="partner_id"/>-->
+<!--                <field name="insurer_id"/>-->
+<!--                <field name="contract_id"/>-->
+<!--                <field name="date_start"/>-->
+<!--                <field name="date_end"/>-->
+<!--                <group expand="0" string="Group By">-->
+<!--                    <filter string="Estado" name="state" domain="[]" context="{'group_by':'status_movement'}"/>-->
+<!--                    <filter string="Tipo de contrato" name="state" domain="[]" context="{'group_by':'type_id'}"/>-->
+<!--                    <filter string="Aseguradora" name="insurer_id" domain="[]" context="{'group_by':'insurer_id'}"/>-->
+<!--                    <filter string="Cliente" name="client_id" domain="[]" context="{'group_by':'partner_id'}"/>-->
+<!--                    <filter string="Contrato" name="contract_id" domain="[]" context="{'group_by':'contract_id'}"/>-->
+<!--                    <filter string="Incio de vigencia" name="date_start" domain="[]"-->
+<!--                            context="{'group_by': 'date_start'}"/>-->
+<!--                    <filter string="Fin de vigencia" name="date_end" domain="[]" context="{'group_by': 'date_end'}"/>-->
+<!--                </group>-->
+<!--            </search>-->
+<!--        </field>-->
+<!--    </record>-->
+
+</odoo>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="broker_depreciation_form_view" model="ir.ui.view">
+            <field name="name">broker.depreciation.form</field>
+            <field name="model">broker.depreciation</field>
+            <field name="arch" type="xml">
+                <form string="Tabla de Depreciacion">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1>
+                                <field name="name" placeholder="Nombre de la Depreciación"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="rate" widget="percentage"/>
+                            </group>
+                            <group>
+                                <field name="model_ids" widget="many2many_tags"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Depreciación">
+                                <field name="depreciation_lines">
+                                    <tree editable="bottom">
+                                        <field name="year"/>
+                                        <field name="action"/>
+                                        <field name="depreciation" widget="percentage"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="broker_depreciation_tree_view" model="ir.ui.view">
+            <field name="name">broker.depreciation.tree</field>
+            <field name="model">broker.depreciation</field>
+            <field name="arch" type="xml">
+                <tree string="ModelTitle">
+                    <field name="name"/>
+                    <field name="rate" widget="percentage"/>
+                    <field name="model_ids" widget="many2many_tags"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="broker_depreciation_act_window" model="ir.actions.act_window">
+            <field name="name">Tabla de Depreciación</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">broker.depreciation</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Añada una nueva tabla de depreciación
+                </p>
+            </field>
+        </record>
+
+        <menuitem name="Tabla de depreciación" id="broker_depreciation_menu" parent="broker_do.brokerdo_insurance_menu"
+                  action="broker_depreciation_act_window"/>
+
+    </data>
+</odoo>

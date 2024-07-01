@@ -1,0 +1,166 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tandi_custom
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-06-25 22:17+0000\n"
+"PO-Revision-Date: 2024-06-25 22:17+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: tandi_custom
+#: model_terms:ir.ui.view,arch_db:tandi_custom.view_tandi_import_xml_wizard
+msgid "Close"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: tandi_custom
+#. odoo-python
+#: code:addons/tandi_custom/models/account_move.py:0
+#, python-format
+msgid ""
+"Document: %s has Provisional product on it's invoice lines, \n"
+"                        you need to change that to an appropriate product"
+msgstr ""
+"El documento: %s tiene Productos provisionales en sus detalles, \n"
+"                        es necesario cambiarlos por el producto apropiado"
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_account_bank_statement_line__tandi_xml_imported
+#: model:ir.model.fields,field_description:tandi_custom.field_account_move__tandi_xml_imported
+#: model:ir.model.fields,field_description:tandi_custom.field_account_payment__tandi_xml_imported
+msgid "Ecuador XML imported invoice?"
+msgstr "Factura XML importada?"
+
+#. module: tandi_custom
+#. odoo-python
+#: code:addons/tandi_custom/wizard/tandi_import_xml_wizard.py:0
+#, python-format
+msgid "Error! Supplier invoice does not correspond to company"
+msgstr "Error! La factura de proveedor no corresponde a la compañía"
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice__file
+msgid "File"
+msgstr "Archivo"
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice__filename
+msgid "File name"
+msgstr "Nombre de archivo"
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice__id
+msgid "ID"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.actions.act_window,name:tandi_custom.action_tandi_import_xml_invoice
+#: model_terms:ir.ui.view,arch_db:tandi_custom.view_tandi_import_xml_wizard
+msgid "Import XML"
+msgstr "Importar XML"
+
+#. module: tandi_custom
+#: model:ir.ui.menu,name:tandi_custom.menu_wizard_invoice_xml
+msgid "Import XML invoice"
+msgstr "Importar factura XML"
+
+#. module: tandi_custom
+#. odoo-python
+#: code:addons/tandi_custom/wizard/tandi_import_xml_wizard.py:0
+#, python-format
+msgid "Invoice with authorization number: %s already exists!"
+msgstr "La factura con número de autorización: %s ya existe!"
+
+#. module: tandi_custom
+#: model:ir.model,name:tandi_custom.model_account_move
+msgid "Journal Entry"
+msgstr "Entrada de diario"
+
+#. module: tandi_custom
+#: model:ir.model,name:tandi_custom.model_account_move_line
+msgid "Journal Item"
+msgstr "Apunte contable"
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_tandi_import_xml_invoice__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: tandi_custom
+#: model:product.template,name:tandi_custom.provisional_product_import_product_template
+msgid "Producto Provisional"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.model.fields,help:tandi_custom.field_account_bank_statement_line__tandi_xml_imported
+#: model:ir.model.fields,help:tandi_custom.field_account_move__tandi_xml_imported
+#: model:ir.model.fields,help:tandi_custom.field_account_payment__tandi_xml_imported
+msgid "This field is used to identify Ecuadorian XML imported invoices"
+msgstr ""
+
+#. module: tandi_custom
+#. odoo-python
+#: code:addons/tandi_custom/models/account_move.py:0
+#, python-format
+msgid ""
+"This invoice has been imported from an XML, take the following considerations: \n"
+"Invoice was loaded without taxes (IVA), so totals may change when provisional product gets updated. Change default provisional products upon invoice posting."
+msgstr ""
+"Esta factura ha sido importada desde un XML, tome las siguientes consideraciones: \n"
+"La factura fue cargada sin impuestos(IVA), por tanto los totales pueden cambiar cuando actualice los productos provisionales. Cambie los productos provisionales antes de publicar la factura."
+
+#. module: tandi_custom
+#: model_terms:ir.ui.view,arch_db:tandi_custom.view_tandi_import_xml_wizard
+msgid "This wizard allows you to load an authorized SRI XML"
+msgstr "Este asistente permite cargar un XML autorizado por el SRI"
+
+#. module: tandi_custom
+#: model:ir.model.fields,help:tandi_custom.field_account_bank_statement_line__tandi_xml_import_validation
+#: model:ir.model.fields,help:tandi_custom.field_account_move__tandi_xml_import_validation
+#: model:ir.model.fields,help:tandi_custom.field_account_payment__tandi_xml_import_validation
+msgid "Warning message when invoice has been imported from XML"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.model.fields,field_description:tandi_custom.field_account_bank_statement_line__tandi_xml_import_validation
+#: model:ir.model.fields,field_description:tandi_custom.field_account_move__tandi_xml_import_validation
+#: model:ir.model.fields,field_description:tandi_custom.field_account_payment__tandi_xml_import_validation
+msgid "XML imported invoice Warning message validation"
+msgstr ""
+
+#. module: tandi_custom
+#: model:ir.model,name:tandi_custom.model_tandi_import_xml_invoice
+msgid "tandi.import.xml.invoice"
+msgstr ""

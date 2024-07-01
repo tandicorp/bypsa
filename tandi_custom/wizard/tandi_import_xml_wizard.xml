@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_tandi_import_xml_wizard" model="ir.ui.view">
+            <field name="name">Import XML</field>
+            <field name="model">tandi.import.xml.invoice</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Import XML">
+                    <group col="4" colspan="4">
+                        <label colspan="4" for="file" nolabel="1" string="This wizard allows you to load an authorized SRI XML"/>
+                        <group colspan="4">
+                            <field name="filename" invisible="1"/>
+                            <field name="file" filename="filename" widget="file" colspan="2"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="action_import_xml" type="object" string="Import XML"  class="oe_highlight"/>
+                        ó
+                        <button string="Close" special="cancel" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_tandi_import_xml_invoice" model="ir.actions.act_window">
+            <field name="name">Import XML</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">tandi.import.xml.invoice</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_tandi_import_xml_wizard"/>
+            <field name="target">new</field>
+        </record>
+
+         <menuitem name="Import XML invoice" action="action_tandi_import_xml_invoice"
+                  id="menu_wizard_invoice_xml" parent="account.menu_finance_payables"/>
+    </data>
+</odoo>

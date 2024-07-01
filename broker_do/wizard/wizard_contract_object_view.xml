@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="wizard_contract_object_form" model="ir.ui.view">
+        <field name="name">wizard.contract.object.form</field>
+        <field name="model">wizard.contract.object</field>
+        <field name="arch" type="xml">
+            <form string="Establecer objeto en movimiento">
+                <group>
+                        <group>
+                            <field name="contract_id" readonly="1"/>
+                            <field name="movement_id" readonly="1"/>
+                        </group>
+                        <group/>
+                </group>
+                <group>
+                    <field name="movement_contract_object_ids" invisible="1"/>
+                    <field name="contract_object_ids" widget="many2many_list"/>
+                </group>
+                <footer>
+                    <button name="set_object_data" type="object" string="Establecer objetos"
+                            class="oe_highlight"/>
+                    ó
+                    <button string="Cerrar" special="cancel" class="oe_link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

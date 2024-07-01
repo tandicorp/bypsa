@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tandi_xml_import_view_move_form_inherit" model="ir.ui.view">
+        <field name="name">tandi.xml.import.view.move.form.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <header position="after">
+                <div class="alert alert-warning" role="alert" attrs="{'invisible': [('tandi_xml_import_validation','=',False)]}">
+                    <field name="tandi_xml_import_validation"/>
+                </div>
+            </header>
+        </field>
+    </record>
+</odoo>

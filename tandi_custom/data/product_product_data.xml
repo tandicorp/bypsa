@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data noupdate="0">
+        <record id="provisional_product_import" model="product.product">
+            <field name="name">Producto Provisional</field>
+            <field name="purchase_ok">True</field>
+            <field name="detailed_type">service</field>
+        </record>
+    </data>
+</odoo>
