@@ -17,6 +17,24 @@
             <xpath expr="//field[@name='sequence']" position="attributes">
                 <attribute name="string">Número de endoso</attribute>
             </xpath>
+            <xpath expr="//field[@name='fee_line_ids']//tree//field[@name='amount_insurance_due']" position="before">
+                <field name="amount_insured" sum="Total" optional="hide"/>
+                <field name="value_depreciated" sum="Total" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="broker_movement_object_bypsa_form" model="ir.ui.view">
+        <field name="name">broker.movement.object.bypsa.form</field>
+        <field name="model">broker.movement.object</field>
+        <field name="inherit_id" ref="broker_do.broker_movement_object_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_insured']" position="after">
+                <field name="depreciation_id"/>
+            </xpath>
+            <xpath expr="//field[@name='rate']" position="attributes">
+                <attribute name="attrs">{'readonly':[('depreciation_id','!=',False)]}</attribute>
+            </xpath>
         </field>
     </record>
 

@@ -29,7 +29,7 @@ class BrokerMovementBranch(models.Model):
     type_id = fields.Many2one(
         "sale.order.type",
         string='Tipo de Anexo',
-        required=True
+        required=True,
     )
     branch_id = fields.Many2one(
         'broker.branch',
@@ -70,6 +70,35 @@ class BrokerMovementBranch(models.Model):
         string="Definición Objetos Agrupados",
         domain=lambda self: [('object_type', '=', 'blanket')]
     )
+
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        default = dict(default or {})
+        lines = []
+        for object_line in self.object_line_ids:
+            lines.append(fields.Command.create({
+                "name": object_line.name,
+                "object_type": object_line.object_type,
+                "type": object_line.type,
+                "value": object_line.value,
+                "add_value": object_line.add_value,
+            }))
+        blank_lines = []
+        for blank_line in self.blanket_line_ids:
+            blank_lines.append(fields.Command.create({
+                "name": blank_line.name,
+                "object_type": blank_line.object_type,
+                "type": blank_line.type,
+                "value": blank_line.value,
+                "add_value": blank_line.add_value,
+            }))
+        default.update({
+            "object_line_ids": lines,
+            "blanket_line_ids": blank_lines,
+            "branch_id": self.branch_id.id,
+        })
+        broker_branch = super(BrokerMovementBranch, self).copy(default=default)
+        return broker_branch
 
 
 class BrokerMovementBranchObject(models.Model):

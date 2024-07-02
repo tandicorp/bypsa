@@ -12,6 +12,7 @@ import base64
 class BrokerMovementObject(models.Model):
     _name = 'broker.movement.object'
     _description = 'Objetos Asegurados de Anexo'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(
         string='Nombre'
@@ -46,7 +47,7 @@ class BrokerMovementObject(models.Model):
     # Objeto del contrato
     contract_object_id = fields.Many2one(
         "broker.movement.object",
-        string=u"Item póliza"
+        string=u"Item pÃ³liza"
     )
     movement_object_ids = fields.One2many(
         "broker.movement.object",
@@ -73,7 +74,7 @@ class BrokerMovementObject(models.Model):
         default=1
     )
     comment = fields.Text(
-        string="Observación"
+        string="ObservaciÃ³n"
     )
     lead_id = fields.Many2one(
         "crm.lead",
@@ -108,7 +109,7 @@ class BrokerMovementObject(models.Model):
     info_line_ids = fields.One2many(
         "broker.movement.object.line",
         "object_id",
-        string="Información Adicional"
+        string="InformaciÃ³n Adicional"
     )
     child_line_ids = fields.One2many(
         "broker.movement.object",
@@ -127,7 +128,10 @@ class BrokerMovementObject(models.Model):
     data_line_ids = fields.One2many(
         'broker.movement.object.data',
         "object_id",
-        string="Información del Objeto Asegurado"
+        string="InformaciÃ³n del Objeto Asegurado"
+    )
+    rate = fields.Float(
+        string="Tasa",
     )
 
     @api.onchange("lead_id", "movement_id")
@@ -327,7 +331,7 @@ class BrokerMovementObject(models.Model):
         agreement_obj = self.env['agreements.insurer'].sudo()
         agreement_id = agreement_obj.browse(agreement)
         if agreement_id.is_quotation:
-            raise ValidationError("No se puede aceptar una cotización")
+            raise ValidationError("No se puede aceptar una cotizaciÃ³n")
         result = False
         for this in self:
             agree = this.agreements_line_ids.filtered(lambda line: line.agreement_id.id == agreement_id.id)
@@ -345,7 +349,7 @@ class BrokerMovementObject(models.Model):
         """Permite obtener el formato de Objeto Asegurado"""
         movement_branch_id = self.movement_branch_id if self.movement_branch_id and not movement_branch else movement_branch
         if not movement_branch_id:
-            raise ValidationError("No existe una configuración Asociada")
+            raise ValidationError("No existe una configuraciÃ³n Asociada")
         output = io.BytesIO()
         attachment_obj = self.env['ir.attachment']
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
@@ -399,7 +403,7 @@ class BrokerMovementObject(models.Model):
         self.ensure_one()
         template = self.env.ref('broker_do.request_quotation_wizard_form')
         return {
-            'name': 'Petición de Cotización',
+            'name': 'PeticiÃ³n de CotizaciÃ³n',
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'form',
@@ -463,7 +467,7 @@ class BrokerMovementObject(models.Model):
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = dict(default or {})
-        # copiar información adicional
+        # copiar informaciÃ³n adicional
         list_info = []
         for object_info in self.info_line_ids:
             list_info.append(fields.Command.Create({
@@ -527,7 +531,7 @@ class BrokerMovementObjectValue(models.Model):
     )
     movement_branch_object_id = fields.Many2one(
         'broker.movement.branch.object',
-        u'Configuración Asociada',
+        u'ConfiguraciÃ³n Asociada',
         required=True
     )
     value_char = fields.Char(
@@ -576,7 +580,7 @@ class BrokerMovementObjectLine(models.Model):
         required=True
     )
     comment = fields.Text(
-        string="Observación"
+        string="ObservaciÃ³n"
     )
     object_id = fields.Many2one(
         "broker.movement.object",
@@ -586,7 +590,12 @@ class BrokerMovementObjectLine(models.Model):
 
 class BrokerMovementObjectData(models.Model):
     _name = 'broker.movement.object.data'
-    _description = 'Información del Objeto Asegurado'
+    _description = 'InformaciÃ³n del Objeto Asegurado'
+    _order = "sequence asc"
+
+    sequence = fields.Integer(
+        string='Secuencia'
+    )
 
     name = fields.Char(
         string="Nombre",
@@ -602,7 +611,7 @@ class BrokerMovementObjectData(models.Model):
         default="char"
     )
     value_change = fields.Char(
-        string=u"Modificación"
+        string=u"ModificaciÃ³n"
     )
     final_value = fields.Char(
         string=u"Valor final",
@@ -614,7 +623,7 @@ class BrokerMovementObjectData(models.Model):
         help="Usado para el listado de los campos de tipo Selection"
     )
     add_value = fields.Boolean(
-        string="¿Suma al Valor?",
+        string="Â¿Suma al Valor?",
         default=False,
     )
     object_id = fields.Many2one(

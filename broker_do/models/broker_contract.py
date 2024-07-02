@@ -12,6 +12,7 @@ _OPTIONS_PAYMENT = [
 ]
 _FIELDS_PERIOD_CHANGE = ["period_type", "date_start", "date_end"]
 
+
 class BrokerContract(models.Model):
     _name = 'broker.contract'
     _inherit = ['mail.thread', 'mail.activity.mixin']

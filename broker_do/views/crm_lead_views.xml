@@ -80,6 +80,7 @@
                            context="{
                             'default_branch_id': branch_id,
                             'default_type': object_type,
+                            'default_type_id': %(broker_do.policy_movement)d,
                             }">
                         <tree>
                             <field name="branch_id" invisible="1"/>

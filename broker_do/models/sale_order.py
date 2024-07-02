@@ -11,7 +11,8 @@ import calendar
 
 _module = 'broker_do'
 _branches_medical_assistance = ['broker_branch_medical_assistance']
-_branches_no_taxes = ['broker_branch_individual', 'broker_branch_collective', 'broker_branch_accident'] + _branches_medical_assistance
+_branches_no_taxes = ['broker_branch_individual', 'broker_branch_collective',
+                      'broker_branch_accident'] + _branches_medical_assistance
 
 
 class SaleOrder(models.Model):
@@ -206,6 +207,10 @@ class SaleOrder(models.Model):
         store=True,
         string="Ramo"
     )
+    is_manual_fee = fields.Boolean(
+        string="¿Es prima manual?",
+        default=True
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -215,8 +220,9 @@ class SaleOrder(models.Model):
                 move_draft_ids = contract_obj.browse(element['contract_id']).movement_ids.filtered(
                     lambda x: x.status_movement in ('draft', 'insurance_release'))
                 if move_draft_ids:
-                    raise ValidationError(u'No se puede crear nuevos movimientos si existen, movimientos anteriores en borrador.'
-                                          u'\n¡Por favor confirme o elimine los movimientos previos antes de continuar!')
+                    raise ValidationError(
+                        u'No se puede crear nuevos movimientos si existen, movimientos anteriores en borrador.'
+                        u'\n¡Por favor confirme o elimine los movimientos previos antes de continuar!')
         return super(SaleOrder, self).create(vals_list)
 
     @api.depends()
@@ -297,6 +303,13 @@ class SaleOrder(models.Model):
         self.amount_due = sum([self.amount_fee, self.amount_tax_insurance_peasant,
                                self.amount_tax_super_cias, self.amount_tax_iva,
                                self.amount_tax_emission_rights, self.amount_other_charges])
+        if self.fee_line_ids:
+            if self.taxes_calculation == 'first_fee':
+                fee = self.fee_line_ids.filtered(lambda fee: fee.sequence == 1)
+                if fee:
+                    taxes = ['amount_tax_insurance_peasant', 'amount_tax_super_cias', 'amount_tax_iva',
+                             'amount_tax_emission_rights', 'amount_other_charges']
+                    fee[0].amount_insurance_due = fee[0].amount_insurance_fee + sum([self[tax] for tax in taxes])
 
     @api.onchange('type_id')
     def onchange_amounts_for_commission(self):
@@ -309,6 +322,33 @@ class SaleOrder(models.Model):
     def get_amount_total_commission(self):
         value = sum(self.order_line.mapped("price_unit"))
         self.amount_total_commission = value
+
+    def get_value_amounts(self, mount_fee, mount_due, index=False, list_fee_amount=False, type_taxes=False):
+        return mount_fee, mount_due
+
+    def assign_fee_amounts(self, residual_amount_due, residual_amount_fee, fee_vals, type_taxes=False,
+                           list_amounts=False):
+        decimal_places = self.env.company.currency_id.decimal_places
+        period_num = len(fee_vals)
+        taxes = ['amount_tax_insurance_peasant', 'amount_tax_super_cias', 'amount_tax_iva',
+                 'amount_tax_emission_rights', 'amount_other_charges']
+        if period_num:
+            equal_mount_due = residual_amount_due / period_num
+            equal_mount_fee = residual_amount_fee / period_num
+            for index, val in enumerate(fee_vals):
+                mount_fee, mount_due = self.get_value_amounts(equal_mount_fee, equal_mount_due, index=index,
+                                                              list_fee_amount=list_amounts, type_taxes=type_taxes)
+                if type_taxes == 'first_fee' and index == 0:
+                    mount_due = mount_fee + sum([self[tax] for tax in taxes])
+                    if period_num - 1:
+                        equal_mount_due = (residual_amount_due - mount_due) / (period_num - 1)
+                val.update(
+                    {
+                        'amount_insurance_due': float_round(mount_due, decimal_places, rounding_method='HALF-DOWN'),
+                        'amount_insurance_fee': float_round(mount_fee, decimal_places, rounding_method='HALF-DOWN'),
+                    }
+                )
+        return fee_vals
 
     def action_calculate_fee(self):
         decimal_places = self.env.company.currency_id.decimal_places
@@ -338,27 +378,6 @@ class SaleOrder(models.Model):
                  } for i in range_period
             ])
             return list_due
-
-        def assign_fee_amounts(residual_amount_due, residual_amount_fee, fee_vals, type_taxes=False):
-            period_num = len(fee_vals)
-            taxes = ['amount_tax_insurance_peasant', 'amount_tax_super_cias', 'amount_tax_iva',
-                     'amount_tax_emission_rights', 'amount_other_charges']
-            if period_num:
-                equal_mount_due = residual_amount_due / period_num
-                equal_mount_fee = residual_amount_fee / period_num
-                for index, val in enumerate(fee_vals):
-                    mount_fee = equal_mount_fee
-                    mount_due = equal_mount_due
-                    if type_taxes == 'first_fee' and index == 0:
-                        mount_due = equal_mount_fee + sum([self[tax] for tax in taxes])
-                        equal_mount_due = (residual_amount_due - mount_due) / period_num
-                    val.update(
-                        {
-                            'amount_insurance_due': float_round(mount_due, decimal_places, rounding_method='HALF-DOWN'),
-                            'amount_insurance_fee': float_round(mount_fee, decimal_places, rounding_method='HALF-DOWN'),
-                        }
-                    )
-            return fee_vals
 
         def adjust_period_amounts(residual_amount_due, residual_amount_fee, fee_line_ids):
             if len(fee_line_ids) <= 1:
@@ -393,8 +412,8 @@ class SaleOrder(models.Model):
             balance_amount_due = self.amount_due  # CUOTA TOTAL
             balance_amount_fee = self.amount_fee  # PRIMA NETA
             fee_line_ids = assign_fee_period(num_period, period, date_begin, len(paid_fee_ids), first_date=first_date)
-            fee_line_ids = assign_fee_amounts(balance_amount_due, balance_amount_fee, fee_line_ids,
-                                              type_taxes=self.taxes_calculation)
+            fee_line_ids = self.assign_fee_amounts(balance_amount_due, balance_amount_fee, fee_line_ids,
+                                                   type_taxes=self.taxes_calculation, list_amounts=False)
             fee_line_ids = adjust_period_amounts(balance_amount_due, balance_amount_fee, fee_line_ids)
             operation = 1 if self.type_id.operation == 'positive' else -1
             for line in fee_line_ids:

@@ -166,9 +166,13 @@ class AgreementsInsurer(models.Model):
     def copy(self, default=None):
         default = dict(default or {})
         amount_insured = False
+        rate = False
         if default.get("amount_insured"):
             amount_insured = default.get("amount_insured")
+        if default.get("rate"):
+            rate = default.get("rate")
         default.pop("amount_insured",None)
+        default.pop("rate",None)
         coverage_id = self.coverage_id.id if not default.get("coverage_id") else default.get("coverage_id")
         default.update({
             "default": False,
@@ -185,9 +189,9 @@ class AgreementsInsurer(models.Model):
         for line in agreement.agreements_line_ids.filtered(lambda line_new: line_new.display_type == 'attribute'):
             line_origin = lines_origin.filtered(lambda l_origin: l_origin.field == line.field)
             if line_origin:
-                line.amount_insured = (amount_insured or line_origin[0].amount_insured) if not line.is_limit else 0.0
-                line.rate = line_origin[0].rate
-                line.value = line_origin[0].value
+                line.amount_insured = (amount_insured or line_origin[0].amount_insured) if line.is_coverage  else 0.0
+                line.rate = (rate * 100 or line_origin[0].rate) if not line.is_limit else 0.0
+                line.value = (amount_insured * rate) if line.is_coverage else line_origin[0].value
         return agreement
 
 
@@ -217,6 +221,10 @@ class AgreementsInsurerLine(models.Model):
     field = fields.Char(
         related='coverage_line_id.field',
         store=True
+    )
+    tooltip = fields.Text(
+        related='coverage_line_id.tooltip',
+        string="Sugerencia"
     )
     is_amount_fee = fields.Boolean(
         related='coverage_line_id.is_amount_fee',

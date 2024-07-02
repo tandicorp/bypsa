@@ -68,7 +68,10 @@ class AgreementInsurerWizard(models.TransientModel):
                 agreements = agreements.filtered(lambda ag: ag.agreement_id.id not in lead_agreement.ids)
                 for agree in agreements:
                     agree_cp = agree.agreement_id.copy(
-                        {"coverage_id": this.template_id.id, "amount_insured": this.object_id.amount_insured})
+                        {"coverage_id": this.template_id.id,
+                         "amount_insured": this.object_id.amount_insured,
+                         "rate": this.object_id.rate ,
+                         })
                     lines.append(fields.Command.create({
                         "agreement_id": agree_cp.id
                     }))
