@@ -28,7 +28,7 @@ class SaleOrder(models.Model):
     def _compute_amount_taxes_insurance(self):
         super(SaleOrder, self)._compute_amount_taxes_insurance()
         for record in self:
-            if record.amount_fee:
+            if record.amount_fee and not record.payment_period == 'monthly':
                 if record.amount_fee <= 250:
                     record.table_emission_rights = '0'
                     record.amount_tax_emission_rights = 0.5
@@ -47,6 +47,8 @@ class SaleOrder(models.Model):
                 elif record.amount_fee > 4000:
                     record.table_emission_rights = '5'
                     record.amount_tax_emission_rights = 9
+            if record.payment_period != 'monthly' and record.amount_fee:
+                record.amount_tax_emission_rights = 2
 
     @api.onchange('table_emission_rights')
     def onchange_amounts_emission_rights(self):

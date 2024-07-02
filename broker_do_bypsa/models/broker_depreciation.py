@@ -40,6 +40,7 @@ class BrokerDepreciationLine(models.Model):
     _order = "year asc"
 
     year = fields.Selection([
+        ("0", "Cuota Inicial"),
         ("1", "1er Año"),
         ("2", "2do Año"),
         ("3", "3er Año"),

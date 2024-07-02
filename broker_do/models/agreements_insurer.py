@@ -222,6 +222,10 @@ class AgreementsInsurerLine(models.Model):
         related='coverage_line_id.field',
         store=True
     )
+    tooltip = fields.Text(
+        related='coverage_line_id.tooltip',
+        string="Sugerencia"
+    )
     is_amount_fee = fields.Boolean(
         related='coverage_line_id.is_amount_fee',
         store=True

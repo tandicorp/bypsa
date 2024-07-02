@@ -15,7 +15,7 @@ export class InsurerList extends Component {
             this.loadRecords();
         })
         // todo: Revisar si hay una forma de escuchar eventos
-        // setInterval(this.loadRecords.bind(this), 10000);
+        setInterval(this.loadRecords.bind(this), 10000);
     }
 
     async loadRecords() {

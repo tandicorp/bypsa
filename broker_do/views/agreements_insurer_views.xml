@@ -59,8 +59,9 @@
                                     <field name="coverage_line_id" invisible="1" readonly="1" force_save="1"/>
                                     <field name="name" readonly="1" force_save="1" widget="section_and_note_text"
                                            optional="show"/>
+                                    <field name="tooltip" optional="hide"/>
                                     <field name="field" readonly="1" force_save="1"/>
-                                    <field name="amount_insured" optional="hid"/>
+                                    <field name="amount_insured" optional="hide"/>
                                     <field name="rate"/>
                                     <field name="value"/>
                                     <field name="name_title" force_save="1" invisible="1"/>

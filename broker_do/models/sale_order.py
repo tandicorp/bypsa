@@ -11,7 +11,8 @@ import calendar
 
 _module = 'broker_do'
 _branches_medical_assistance = ['broker_branch_medical_assistance']
-_branches_no_taxes = ['broker_branch_individual', 'broker_branch_collective', 'broker_branch_accident'] + _branches_medical_assistance
+_branches_no_taxes = ['broker_branch_individual', 'broker_branch_collective',
+                      'broker_branch_accident'] + _branches_medical_assistance
 
 
 class SaleOrder(models.Model):
@@ -219,8 +220,9 @@ class SaleOrder(models.Model):
                 move_draft_ids = contract_obj.browse(element['contract_id']).movement_ids.filtered(
                     lambda x: x.status_movement in ('draft', 'insurance_release'))
                 if move_draft_ids:
-                    raise ValidationError(u'No se puede crear nuevos movimientos si existen, movimientos anteriores en borrador.'
-                                          u'\n¡Por favor confirme o elimine los movimientos previos antes de continuar!')
+                    raise ValidationError(
+                        u'No se puede crear nuevos movimientos si existen, movimientos anteriores en borrador.'
+                        u'\n¡Por favor confirme o elimine los movimientos previos antes de continuar!')
         return super(SaleOrder, self).create(vals_list)
 
     @api.depends()
@@ -301,6 +303,13 @@ class SaleOrder(models.Model):
         self.amount_due = sum([self.amount_fee, self.amount_tax_insurance_peasant,
                                self.amount_tax_super_cias, self.amount_tax_iva,
                                self.amount_tax_emission_rights, self.amount_other_charges])
+        if self.fee_line_ids:
+            if self.taxes_calculation == 'first_fee':
+                fee = self.fee_line_ids.filtered(lambda fee: fee.sequence == 1)
+                if fee:
+                    taxes = ['amount_tax_insurance_peasant', 'amount_tax_super_cias', 'amount_tax_iva',
+                             'amount_tax_emission_rights', 'amount_other_charges']
+                    fee[0].amount_insurance_due = fee[0].amount_insurance_fee + sum([self[tax] for tax in taxes])
 
     @api.onchange('type_id')
     def onchange_amounts_for_commission(self):

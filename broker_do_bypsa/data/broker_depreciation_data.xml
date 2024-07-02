@@ -7,6 +7,11 @@
             <field name="rate">0.032</field>
             <field name="depreciation_lines" eval="[
                    (0, 0, {
+                   'year': '0',
+                   'action': 'value_invoice',
+                   'depreciation': 0
+                   }),
+                   (0, 0, {
                    'year': '1',
                    'action': 'value_invoice',
                    'depreciation': 0
@@ -45,11 +50,16 @@
              ref('RUSH')
              ])]"/>
         </record>
-         <!--        GAMA MEDIA-->
+        <!--        GAMA MEDIA-->
         <record id="medium_range_depreciation" model="broker.depreciation">
             <field name="name">GAMA MEDIA</field>
             <field name="rate">0.024</field>
             <field name="depreciation_lines" eval="[
+                    (0, 0, {
+                   'year': '0',
+                   'action': 'value_invoice',
+                   'depreciation': 0
+                   }),
                    (0, 0, {
                    'year': '1',
                    'action': 'value_invoice',
@@ -89,11 +99,16 @@
              ])]"/>
         </record>
 
-          <!--        CAMIONETAS-->
+        <!--        CAMIONETAS-->
         <record id="trucks_depreciation" model="broker.depreciation">
             <field name="name">CAMIONETAS</field>
             <field name="rate">0.0295</field>
             <field name="depreciation_lines" eval="[
+                    (0, 0, {
+                   'year': '0',
+                   'action': 'value_invoice',
+                   'depreciation': 0
+                   }),
                    (0, 0, {
                    'year': '1',
                    'action': 'value_invoice',
@@ -130,11 +145,16 @@
              ])]"/>
         </record>
 
-           <!--        GAMA ALTA-->
+        <!--        GAMA ALTA-->
         <record id="high_range_depreciation" model="broker.depreciation">
             <field name="name">GAMA ALTA</field>
             <field name="rate">0.022</field>
-           <field name="depreciation_lines" eval="[
+            <field name="depreciation_lines" eval="[
+                    (0, 0, {
+                   'year': '0',
+                   'action': 'value_invoice',
+                   'depreciation': 0
+                   }),
                    (0, 0, {
                    'year': '1',
                    'action': 'value_invoice',
@@ -172,11 +192,16 @@
              ])]"/>
         </record>
 
-            <!--        GAMA CRUICER-->
+        <!--        GAMA CRUICER-->
         <record id="cruicer_depreciation" model="broker.depreciation">
             <field name="name">GAMA CRUICER</field>
             <field name="rate">0.022</field>
-           <field name="depreciation_lines" eval="[
+            <field name="depreciation_lines" eval="[
+                    (0, 0, {
+                   'year': '0',
+                   'action': 'value_invoice',
+                   'depreciation': 0
+                   }),
                    (0, 0, {
                    'year': '1',
                    'action': 'value_invoice',
